@@ -24,7 +24,7 @@ import {CommonUtils} from "../utils/CommonUtils.sol";
 import {IDSRegistryService} from "./IDSRegistryService.sol";
 import {RegistryServiceDataStore} from "../data-stores/RegistryServiceDataStore.sol";
 
-contract RegistryService is IDSRegistryService, RegistryServiceDataStore, IGlobalRegistryService, BaseRBACContract {
+contract GlobalRegistryService is IDSRegistryService, RegistryServiceDataStore, IGlobalRegistryService, BaseRBACContract {
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -35,7 +35,39 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, IGloba
         __BaseRBACContract_init();
     }
 
-    function registerInvestor(string calldata _id, string calldata _collisionHash) public override newInvestor(_id) returns (bool) {
+    /// @inheritdoc IGlobalRegistryService
+    function isAdmin(address account) public virtual view override returns (bool) {
+        return hasRole(DEFAULT_ADMIN_ROLE, account);
+    }
+
+    /// @inheritdoc IGlobalRegistryService
+    function changeAdmin(address newAdmin) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (newAdmin == address(0)) {
+            revert ZeroAddressInvalid();
+        }
+        emit AdminChanged(newAdmin);
+        _grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
+        _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    }
+
+    /// @inheritdoc IGlobalRegistryService
+    function isOperator(address account) public virtual view override returns (bool) {
+        return hasRole(OPERATOR_ROLE, account);
+    }
+
+    /// @inheritdoc IGlobalRegistryService
+    function addOperator(address operator) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(operator) {
+        _grantRole(OPERATOR_ROLE, operator);
+        emit OperatorAdded(operator);
+    }
+
+    /// @inheritdoc IGlobalRegistryService
+    function revokeOperator(address account) external override addressNotZero(account) onlyRole(DEFAULT_ADMIN_ROLE) {
+        _revokeRole(OPERATOR_ROLE, account);
+        emit OperatorRevoked(account);
+    }
+
+    function registerInvestor(string calldata _id, string calldata _collisionHash) public override newInvestor(_id) onlyRole(OPERATOR_ROLE) returns (bool) {
         address sender = _msgSender();
         investors[_id] = Investor(_id, _collisionHash, sender, "", 0);
 
@@ -44,7 +76,7 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, IGloba
         return true;
     }
 
-    function removeInvestor(string calldata _id) public override investorExists(_id) returns (bool) {
+    function removeInvestor(string calldata _id) public override investorExists(_id) onlyRole(OPERATOR_ROLE) returns (bool) {
         if (investors[_id].walletCount > 0) {
            revert InvestorHasWallets();
         }
@@ -68,7 +100,7 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, IGloba
         uint8[] memory _attributeIds,
         uint256[] memory _attributeValues,
         uint256[] memory _attributeExpirations
-    ) public override returns (bool) {
+    ) public override onlyRole(OPERATOR_ROLE) returns (bool) {
         if (_attributeValues.length != _attributeIds.length) {
             revert ParameterLengthMismatch();
         }
@@ -117,7 +149,7 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, IGloba
         return (country, attributeValues, attributeExpiries, attributeProofHashes[0], attributeProofHashes[1], attributeProofHashes[2], attributeProofHashes[3]);
     }
 
-    function setCountry(string calldata _id, string memory _country) public override investorExists(_id) returns (bool) {
+    function setCountry(string calldata _id, string memory _country) public override investorExists(_id) onlyRole(OPERATOR_ROLE) returns (bool) {
         string memory prevCountry = getCountry(_id);
         if (!CommonUtils.isEqualString(prevCountry, _country)) {
             investors[_id].country = _country;
@@ -139,6 +171,7 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, IGloba
         public
         override
         investorExists(_id)
+        onlyRole(OPERATOR_ROLE)
         returns (bool)
     {
         if (_attributeId >= 16) {
@@ -166,7 +199,13 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, IGloba
         return attributes[_id][_attributeId].proofHash;
     }
 
-    function addWallet(address _address, string memory _id) public override investorExists(_id) newWallet(_address) returns (bool) {
+    function addWallet(address _address, string memory _id)
+        public
+        override
+        onlyRole(OPERATOR_ROLE)
+        investorExists(_id)
+        newWallet(_address)
+        returns (bool) {
         address sender = _msgSender();
         investorsWallets[_address] = Wallet(_id, sender);
         investors[_id].walletCount++;
@@ -177,7 +216,7 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, IGloba
     }
 
 
-    function removeWallet(address _address, string memory _id) public override walletExists(_address) walletBelongsToInvestor(_address, _id) returns (bool) {
+    function removeWallet(address _address, string memory _id) public override onlyRole(OPERATOR_ROLE) walletExists(_address) walletBelongsToInvestor(_address, _id) returns (bool) {
         delete investorsWallets[_address];
         investors[_id].walletCount--;
 

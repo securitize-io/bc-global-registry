@@ -18,7 +18,34 @@ pragma solidity 0.8.22;
  * limitations under the License.
  */
 
-interface IGlobalRegistryService {
+abstract contract IGlobalRegistryService {
+    modifier addressNotZero(address _address) {
+        if (_address == address(0)) {
+            revert ZeroAddressInvalid();
+        }
+        _;
+    }
+
+    /**
+     * @notice Emitted when the admin account is changed.
+     * @dev Indicates that the Global Registry Service admin has been updated.
+     * @param admin address The address of the new admin.
+     */
+    event AdminChanged(address indexed admin);
+
+    /**
+     * @notice Emitted when a new Operator is added.
+     * @dev Indicates that a new account has been granted the Operator role.
+     * @param operator address The address granted the Operator role.
+     */
+    event OperatorAdded(address indexed operator);
+
+    /**
+     * @notice Emitted when an Operator is revoked.
+     * @dev Indicates that a new account has been revoked the Operator role.
+     * @param operator address The address revoked the Operator role.
+     */
+    event OperatorRevoked(address indexed operator);
 
     /// @dev Thrown when a zero address is provided where a valid address is required.
     error ZeroAddressInvalid();
@@ -34,4 +61,27 @@ interface IGlobalRegistryService {
 
     /// @dev Thrown when an operation is attempted on a non-existent investor attribute
     error UnknownAttribute();
+
+    /// @dev Constant role identifier for the operator role.
+    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+
+    function isOperator(address _account) public virtual view returns (bool);
+
+    function isAdmin(address _account) public virtual view returns (bool);
+
+    function changeAdmin(address _newAdmin) external virtual;
+
+    /**
+     * @notice Grants the Operator role to a specified account.
+     * @dev Adds a new Operator. Emits {OperatorAdded}.
+     * @param _account address The address to grant the Operator role.
+     */
+    function addOperator(address _account) external virtual;
+
+    /**
+     * @notice Revokes the Operator role to a specified account.
+     * @dev Revokes a Operator. Emits {OperatorRevoked}.
+     * @param _account address The address to revoke the Operator role.
+     */
+    function revokeOperator(address _account) external virtual;
 }

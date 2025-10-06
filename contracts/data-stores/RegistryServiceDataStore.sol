@@ -18,7 +18,6 @@
 
 pragma solidity 0.8.22;
 
-
 contract RegistryServiceDataStore {
     struct Attribute {
         uint256 value;

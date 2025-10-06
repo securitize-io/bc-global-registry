@@ -21,13 +21,19 @@ pragma solidity 0.8.22;
 import {CommonUtils} from "../utils/CommonUtils.sol";
 
 abstract contract IDSRegistryService {
-
     function initialize() public virtual;
 
     event DSRegistryServiceInvestorAdded(string investorId, address sender);
     event DSRegistryServiceInvestorRemoved(string investorId, address sender);
     event DSRegistryServiceInvestorCountryChanged(string investorId, string country, address sender);
-    event DSRegistryServiceInvestorAttributeChanged(string investorId, uint256 attributeId, uint256 value, uint256 expiry, string proofHash, address sender);
+    event DSRegistryServiceInvestorAttributeChanged(
+        string investorId,
+        uint256 attributeId,
+        uint256 value,
+        uint256 expiry,
+        string proofHash,
+        address sender
+    );
     event DSRegistryServiceWalletAdded(address wallet, string investorId, address sender);
     event DSRegistryServiceWalletRemoved(address wallet, string investorId, address sender);
 
@@ -84,14 +90,9 @@ abstract contract IDSRegistryService {
         uint256[] memory _attributeExpirations /*onlyIssuerOrAbove*/
     ) public virtual returns (bool);
 
-    function removeInvestor(
-        string calldata _id
-    ) public virtual returns (bool);
+    function removeInvestor(string calldata _id) public virtual returns (bool);
 
-    function setCountry(
-        string calldata _id,
-        string memory _country
-    ) public virtual returns (bool);
+    function setCountry(string calldata _id, string memory _country) public virtual returns (bool);
 
     function getCountry(string memory _id) public view virtual returns (string memory);
 
@@ -111,26 +112,29 @@ abstract contract IDSRegistryService {
 
     function getAttributeProofHash(string memory _id, uint8 _attributeId) public view virtual returns (string memory);
 
-    function addWallet(
-        address _address,
-        string memory _id
-    ) public virtual returns (bool);
+    function addWallet(address _address, string memory _id) public virtual returns (bool);
 
-
-    function removeWallet(
-        address _address,
-        string memory _id
-    ) public virtual returns (bool);
+    function removeWallet(address _address, string memory _id) public virtual returns (bool);
 
     function getInvestor(address _address) public view virtual returns (string memory);
 
     function getInvestorDetails(address _address) public view virtual returns (string memory, string memory);
 
-    function getInvestorDetailsFull(string memory _id)
+    function getInvestorDetailsFull(
+        string memory _id
+    )
         public
         view
         virtual
-        returns (string memory, uint256[] memory, uint256[] memory, string memory, string memory, string memory, string memory);
+        returns (
+            string memory,
+            uint256[] memory,
+            uint256[] memory,
+            string memory,
+            string memory,
+            string memory,
+            string memory
+        );
 
     function isInvestor(string memory _id) public view virtual returns (bool);
 

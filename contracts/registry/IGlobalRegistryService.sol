@@ -71,7 +71,7 @@ abstract contract IGlobalRegistryService {
      * @param _account address The address to check for the Operator role.
      * @return True if the account has the Operator role, false otherwise.
      */
-    function isOperator(address _account) public virtual view returns (bool);
+    function isOperator(address _account) public view virtual returns (bool);
 
     /**
      * @notice Checks if an account holds the Admin role.
@@ -79,7 +79,7 @@ abstract contract IGlobalRegistryService {
      * @param _account address The address to check for the Admin role.
      * @return True if the account has the Admin role, false otherwise.
      */
-    function isAdmin(address _account) public virtual view returns (bool);
+    function isAdmin(address _account) public view virtual returns (bool);
 
     /**
      * @notice Changes the admin of the Global Registry Service.

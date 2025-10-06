@@ -18,12 +18,13 @@
 
 pragma solidity 0.8.22;
 
+import {IGlobalRegistryService} from "./IGlobalRegistryService.sol";
 import {BaseRBACContract} from "../utils/BaseRBACContract.sol";
 import {CommonUtils} from "../utils/CommonUtils.sol";
 import {IDSRegistryService} from "./IDSRegistryService.sol";
 import {RegistryServiceDataStore} from "../data-stores/RegistryServiceDataStore.sol";
 
-contract RegistryService is IDSRegistryService, RegistryServiceDataStore, BaseRBACContract {
+contract RegistryService is IDSRegistryService, RegistryServiceDataStore, IGlobalRegistryService, BaseRBACContract {
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -44,7 +45,9 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, BaseRB
     }
 
     function removeInvestor(string calldata _id) public override investorExists(_id) returns (bool) {
-        require(investors[_id].walletCount == 0, "Investor has wallets");
+        if (investors[_id].walletCount > 0) {
+           revert InvestorHasWallets();
+        }
 
         for (uint8 index = 0; index < 16; index++) {
             delete attributes[_id][index];
@@ -66,8 +69,12 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, BaseRB
         uint256[] memory _attributeValues,
         uint256[] memory _attributeExpirations
     ) public override returns (bool) {
-        require(_attributeValues.length == _attributeIds.length, "Wrong length of parameters");
-        require(_attributeIds.length == _attributeExpirations.length, "Wrong length of parameters");
+        if (_attributeValues.length != _attributeIds.length) {
+            revert ParameterLengthMismatch();
+        }
+        if (_attributeIds.length != _attributeExpirations.length) {
+            revert ParameterLengthMismatch();
+        }
 
         if (!isInvestor(_id)) {
             registerInvestor(_id, _collisionHash);
@@ -78,8 +85,8 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, BaseRB
         }
 
         for (uint256 i = 0; i < _wallets.length; i++) {
-            if (isWallet(_wallets[i])) {
-                require(CommonUtils.isEqualString(getInvestor(_wallets[i]), _id), "Wallet belongs to a different investor");
+            if (isWallet(_wallets[i]) && !CommonUtils.isEqualString(getInvestor(_wallets[i]), _id)) {
+                revert WalletBelongsToAnotherInvestor();
             } else {
                 addWallet(_wallets[i], _id);
             }
@@ -134,7 +141,9 @@ contract RegistryService is IDSRegistryService, RegistryServiceDataStore, BaseRB
         investorExists(_id)
         returns (bool)
     {
-        require(_attributeId < 16, "Unknown attribute");
+        if (_attributeId >= 16) {
+            revert UnknownAttribute();
+        }
 
         attributes[_id][_attributeId].value = _value;
         attributes[_id][_attributeId].expiry = _expiry;

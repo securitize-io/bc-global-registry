@@ -36,35 +36,35 @@ contract GlobalRegistryService is IDSRegistryService, RegistryServiceDataStore, 
     }
 
     /// @inheritdoc IGlobalRegistryService
-    function isAdmin(address account) public virtual view override returns (bool) {
-        return hasRole(DEFAULT_ADMIN_ROLE, account);
+    function isAdmin(address _account) public virtual view override returns (bool) {
+        return hasRole(DEFAULT_ADMIN_ROLE, _account);
     }
 
     /// @inheritdoc IGlobalRegistryService
-    function changeAdmin(address newAdmin) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (newAdmin == address(0)) {
+    function changeAdmin(address _newAdmin) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (_newAdmin == address(0)) {
             revert ZeroAddressInvalid();
         }
-        emit AdminChanged(newAdmin);
-        _grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
+        emit AdminChanged(_newAdmin);
+        _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
         _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
     /// @inheritdoc IGlobalRegistryService
-    function isOperator(address account) public virtual view override returns (bool) {
-        return hasRole(OPERATOR_ROLE, account);
+    function isOperator(address _account) public virtual view override returns (bool) {
+        return hasRole(OPERATOR_ROLE, _account);
     }
 
     /// @inheritdoc IGlobalRegistryService
-    function addOperator(address operator) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(operator) {
-        _grantRole(OPERATOR_ROLE, operator);
-        emit OperatorAdded(operator);
+    function addOperator(address _operator) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(_operator) {
+        _grantRole(OPERATOR_ROLE, _operator);
+        emit OperatorAdded(_operator);
     }
 
     /// @inheritdoc IGlobalRegistryService
-    function revokeOperator(address account) external override addressNotZero(account) onlyRole(DEFAULT_ADMIN_ROLE) {
-        _revokeRole(OPERATOR_ROLE, account);
-        emit OperatorRevoked(account);
+    function revokeOperator(address _account) external override addressNotZero(_account) onlyRole(DEFAULT_ADMIN_ROLE) {
+        _revokeRole(OPERATOR_ROLE, _account);
+        emit OperatorRevoked(_account);
     }
 
     function registerInvestor(string calldata _id, string calldata _collisionHash) public override newInvestor(_id) onlyRole(OPERATOR_ROLE) returns (bool) {

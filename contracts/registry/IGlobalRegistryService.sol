@@ -65,10 +65,27 @@ abstract contract IGlobalRegistryService {
     /// @dev Constant role identifier for the operator role.
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
+    /**
+     * @notice Checks if an account holds the Operator role.
+     * @dev Returns true if the given account has the Operator role.
+     * @param _account address The address to check for the Operator role.
+     * @return True if the account has the Operator role, false otherwise.
+     */
     function isOperator(address _account) public virtual view returns (bool);
 
+    /**
+     * @notice Checks if an account holds the Admin role.
+     * @dev Returns true if the given account has the Admin role.
+     * @param _account address The address to check for the Admin role.
+     * @return True if the account has the Admin role, false otherwise.
+     */
     function isAdmin(address _account) public virtual view returns (bool);
 
+    /**
+     * @notice Changes the admin of the Global Registry Service.
+     * @dev Updates the admin address. Emits {AdminChanged}.
+     * @param _newAdmin address The address of the new admin.
+     */
     function changeAdmin(address _newAdmin) external virtual;
 
     /**

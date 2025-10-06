@@ -5,6 +5,7 @@ import '@openzeppelin/hardhat-upgrades';
 import 'solidity-docgen';
 import 'dotenv/config';
 import './tasks/deploy-all';
+import './tasks/deploy-grs';
 
 const config: HardhatUserConfig = {
   mocha: {

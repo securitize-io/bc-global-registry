@@ -5,5 +5,5 @@
 </p>
 
 ```
-npx hardhat deploy-all --arg01 'sTAVA'
+npx hardhat deploy-all
 ```

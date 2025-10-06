@@ -1,0 +1,11 @@
+image: node:22.4.1
+
+pipelines:
+  default:
+    - step:
+        script:
+          - npm ci
+          - npx hardhat clean
+          - npm run compile
+          - npm test
+          - npm run solhint

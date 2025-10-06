@@ -1,0 +1,47 @@
+{
+  "name": "bc-global-registry-service-sc",
+  "version": "0.0.1",
+  "description": "GRS - Global Registry Service - Smart Contracts",
+  "main": "index.js",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage",
+    "docgen": "hardhat docgen",
+    "solhint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
+    "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/securitize-io/bc-global-registry-service-sc"
+  },
+  "author": "Diego Mernies (diego.mernies@securitize.io)",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.1.0",
+    "@nomicfoundation/hardhat-ethers": "^3.1.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomiclabs/hardhat-solhint": "^3.1.0",
+    "@openzeppelin/hardhat-upgrades": "^3.9.1",
+    "eslint-config-prettier": "^9.1.2",
+    "ethers": "^6.15.0",
+    "hardhat": "^2.26.3",
+    "prettier": "^3.6.2",
+    "prettier-plugin-solidity": "^1.4.3",
+    "solhint": "^5.2.0",
+    "solhint-community": "^4.0.1",
+    "solhint-plugin-prettier": "^0.1.0"
+  },
+  "dependencies": {
+    "@nomicfoundation/hardhat-verify": "^2.0.14",
+    "@openzeppelin/contracts": "^5.3.0",
+    "@openzeppelin/contracts-upgradeable": "^5.3.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.42.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "solidity-docgen": "^0.6.0-beta.36"
+  }
+}

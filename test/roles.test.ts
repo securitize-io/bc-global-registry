@@ -33,6 +33,36 @@ describe('Global Registry Service - Add Operator', () => {
   });
 });
 
+describe('Global Registry Service - Revoke Operator', () => {
+  it('Revoke a operator wallet', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner, newOperator] = await hre.ethers.getSigners();
+    await globalRegistryService.connect(owner).addOperator(newOperator);
+    expect(await globalRegistryService.isOperator(newOperator)).to.be.true;
+    await expect(globalRegistryService.connect(owner).revokeOperator(newOperator))
+      .to.emit(globalRegistryService, 'OperatorRevoked')
+      .withArgs(newOperator);
+
+    expect(await globalRegistryService.isOperator(newOperator)).to.be.false;
+  });
+  it('Revert when signer has not the correct role assigned', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner, unauthorizedWallet] = await hre.ethers.getSigners();
+    await expect(globalRegistryService.connect(unauthorizedWallet).revokeOperator(owner)).to.be.revertedWithCustomError(
+      globalRegistryService,
+      'AccessControlUnauthorizedAccount',
+    );
+  });
+  it('Revert if account is zero address', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner] = await hre.ethers.getSigners();
+    await expect(globalRegistryService.connect(owner).revokeOperator(ZeroAddress)).to.be.revertedWithCustomError(
+      globalRegistryService,
+      'ZeroAddressInvalid',
+    );
+  });
+});
+
 describe('Global Registry Service - Change admin', () => {
   it('Change admin', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);

@@ -76,7 +76,7 @@ contract GlobalRegistryService is
     function registerInvestor(
         string calldata _id,
         string calldata _collisionHash
-    ) public override newInvestor(_id) onlyRole(OPERATOR_ROLE) returns (bool) {
+    ) public override newInvestor(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
         address sender = _msgSender();
         investors[_id] = Investor(_id, _collisionHash, sender, "", 0);
 
@@ -87,7 +87,7 @@ contract GlobalRegistryService is
 
     function removeInvestor(
         string calldata _id
-    ) public override investorExists(_id) onlyRole(OPERATOR_ROLE) returns (bool) {
+    ) public override investorExists(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
         if (investors[_id].walletCount > 0) {
             revert InvestorHasWallets();
         }
@@ -111,7 +111,7 @@ contract GlobalRegistryService is
         uint8[] memory _attributeIds,
         uint256[] memory _attributeValues,
         uint256[] memory _attributeExpirations
-    ) public override onlyRole(OPERATOR_ROLE) returns (bool) {
+    ) public override onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
         if (_attributeValues.length != _attributeIds.length) {
             revert ParameterLengthMismatch();
         }
@@ -181,7 +181,7 @@ contract GlobalRegistryService is
     function setCountry(
         string calldata _id,
         string memory _country
-    ) public override investorExists(_id) onlyRole(OPERATOR_ROLE) returns (bool) {
+    ) public override investorExists(_id) onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
         string memory prevCountry = getCountry(_id);
         if (!CommonUtils.isEqualString(prevCountry, _country)) {
             investors[_id].country = _country;
@@ -205,7 +205,7 @@ contract GlobalRegistryService is
         uint256 _value,
         uint256 _expiry,
         string memory _proofHash
-    ) public override investorExists(_id) onlyRole(OPERATOR_ROLE) returns (bool) {
+    ) public override investorExists(_id) onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
         if (_attributeId >= 16) {
             revert UnknownAttribute();
         }
@@ -234,7 +234,7 @@ contract GlobalRegistryService is
     function addWallet(
         address _address,
         string memory _id
-    ) public override onlyRole(OPERATOR_ROLE) investorExists(_id) newWallet(_address) returns (bool) {
+    ) public override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(_id) newWallet(_address) returns (bool) {
         address sender = _msgSender();
         investorsWallets[_address] = Wallet(_id, sender);
         investors[_id].walletCount++;
@@ -251,6 +251,7 @@ contract GlobalRegistryService is
         public
         override
         onlyRole(OPERATOR_ROLE)
+        whenNotPaused
         walletExists(_address)
         walletBelongsToInvestor(_address, _id)
         returns (bool)

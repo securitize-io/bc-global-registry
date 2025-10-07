@@ -42,7 +42,6 @@ abstract contract IGlobalRegistryService {
      */
     event InvestorRemoved(string investorId, address sender);
 
-
     /**
      *  @notice Emitted when a wallet is added to an investor.
      *  @dev Indicates that a wallet was associated with an investor in Global Registry Service.

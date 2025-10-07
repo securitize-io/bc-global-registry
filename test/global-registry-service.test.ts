@@ -146,7 +146,7 @@ describe('CRUD investor', function () {
     ).revertedWith('Investor already exists');
   });
 
-  it('Trying to register the new investor using an account with NONE permissions - should be an error', async function () {
+  it('Trying to register the new investor using an account with unauthorized wallet', async function () {
     const [, unauthorizedWallet] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(
@@ -156,6 +156,36 @@ describe('CRUD investor', function () {
           INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
           INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
         ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
+  });
+
+  it('Trying to register the new investor using an account with unauthorized wallet', async function () {
+    const [, unauthorizedWallet, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService
+        .connect(unauthorizedWallet)
+        .updateInvestor(
+          INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+          INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+          US,
+          [investor],
+          [1, 2, 4],
+          [1, 1, 1],
+          [0, 0, 0],
+        ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
+  });
+
+  it('Trying to remove the new investor using an account with unauthorized wallet', async function () {
+    const [, unauthorizedWallet] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await expect(
+      globalRegistryService.connect(unauthorizedWallet).removeInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
     ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
   });
 

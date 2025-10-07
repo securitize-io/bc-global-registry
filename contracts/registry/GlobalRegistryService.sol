@@ -70,7 +70,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
 
     function registerInvestor(
         string calldata _id,
-        string calldata _collisionHash
+        string calldata
     ) public override newInvestor(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
         address sender = _msgSender();
         investors[_id] = Investor(_id, sender, 0);
@@ -97,7 +97,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
     function updateInvestor(
         string calldata _id,
         string calldata _collisionHash,
-        string memory _country,
+        string memory,
         address[] memory _wallets,
         uint8[] memory _attributeIds,
         uint256[] memory _attributeValues,
@@ -129,7 +129,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         string memory _id
     )
         public
-        view
+        pure
         override
         returns (
             string memory,
@@ -150,7 +150,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
             attributeProofHashes[i] = getAttributeProofHash(_id, (uint8(2) ** i));
         }
         return (
-            '',
+            "",
             attributeValues,
             attributeExpiries,
             attributeProofHashes[0],
@@ -160,28 +160,19 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         );
     }
 
-    function setCountry(
-        string calldata,
-        string memory
-    ) public override returns (bool) {
-        return true;
+    function setCountry(string calldata, string memory) public pure override returns (bool) {
+        revert NotImplemented();
     }
 
-    function getCountry(string memory) public view override returns (string memory) {
-        return '';
+    function getCountry(string memory) public pure override returns (string memory) {
+        return "";
     }
 
-    function getCollisionHash(string calldata) public view override returns (string memory) {
-        return '';
+    function getCollisionHash(string calldata) public pure override returns (string memory) {
+        return "";
     }
 
-    function setAttribute(
-        string calldata,
-        uint8,
-        uint256,
-        uint256 ,
-        string memory
-    ) public override returns (bool) {
+    function setAttribute(string calldata, uint8, uint256, uint256, string memory) public pure override returns (bool) {
         revert NotImplemented();
     }
 
@@ -194,7 +185,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
     }
 
     function getAttributeProofHash(string memory, uint8) public pure override returns (string memory) {
-        return '';
+        return "";
     }
 
     function addWallet(
@@ -243,7 +234,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
     }
 
     function isAccreditedInvestor(string calldata) external pure override returns (bool) {
-       return true;
+        return true;
     }
 
     function isAccreditedInvestor(address) external pure override returns (bool) {

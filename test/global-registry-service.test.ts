@@ -325,10 +325,17 @@ describe('Wallets', function () {
   });
 });
 
-describe('Set Attribute', function () {
-  it('Should throw if already initialized', async () => {
+describe('Not implemented features', function () {
+  it('Should throw not implemented when trying to set attribute', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(globalRegistryService.setAttribute('id', 1, 1, 1, 'hash')).to.be.revertedWithCustomError(
+      globalRegistryService,
+      'NotImplemented',
+    );
+  });
+  it('Should throw not implemented when trying to set attribute', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(globalRegistryService.setCountry('id', 'FR')).to.be.revertedWithCustomError(
       globalRegistryService,
       'NotImplemented',
     );

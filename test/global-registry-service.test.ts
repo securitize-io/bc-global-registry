@@ -231,74 +231,106 @@ describe('CRUD investor', function () {
   });
 });
 
-describe('Wallets', function() {
-  it('Trying to add the wallet', async function() {
+describe('Wallets', function () {
+  it('Trying to add the wallet', async function () {
     const [owner, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
     expect(await globalRegistryService.isWallet(investor)).to.equal(false);
 
-    await globalRegistryService.registerInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1);
-    await expect(
-        globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1)
-    ).to.emit(globalRegistryService, 'WalletAdded').withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await expect(globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1))
+      .to.emit(globalRegistryService, 'WalletAdded')
+      .withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
   });
 
-
-  it('Trying to remove a wallet', async function() {
+  it('Trying to remove a wallet', async function () {
     const [owner, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
-    await globalRegistryService.registerInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
     await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
-    await expect(
-        globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1)
-    ).to.emit(globalRegistryService, 'WalletRemoved').withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
+    await expect(globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1))
+      .to.emit(globalRegistryService, 'WalletRemoved')
+      .withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isWallet(investor)).to.equal(false);
   });
 
-  it('Trying to add the wallet with unauthorized wallet', async function() {
+  it('Trying to add the wallet with unauthorized wallet', async function () {
     const [, unauthorized, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(
-        globalRegistryService.connect(unauthorized).addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+      globalRegistryService.connect(unauthorized).addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
     ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
   });
 
-  it('Trying to remove the wallet with unauthorized wallet', async function() {
+  it('Trying to remove the wallet with unauthorized wallet', async function () {
     const [, unauthorized, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(
-        globalRegistryService.connect(unauthorized).removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+      globalRegistryService.connect(unauthorized).removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
     ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
   });
 
-  it('Trying to add the same wallet - should be an error', async function() {
+  it('Trying to add the same wallet - should be an error', async function () {
     const [investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
-    await globalRegistryService.registerInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
     await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
-    await expect(globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.revertedWith('Wallet already exists');
+    await expect(globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.revertedWith(
+      'Wallet already exists',
+    );
   });
 
-  it('Trying to remove the wallet from the investor that does not exist - should be an error', async function() {
+  it('Trying to remove the wallet from the investor that does not exist - should be an error', async function () {
     const [investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
-    await expect(globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.revertedWith('Unknown wallet');
+    await expect(globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.revertedWith(
+      'Unknown wallet',
+    );
   });
 
-  it('Trying to remove the wallet with the wrong investor - should be an error', async function() {
+  it('Trying to remove the wallet with the wrong investor - should be an error', async function () {
     const [investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
-    await globalRegistryService.registerInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
     await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
-    await expect(globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_2)).to.revertedWith('Wallet does not belong to investor');
+    await expect(globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_2)).to.revertedWith(
+      'Wallet does not belong to investor',
+    );
   });
 
-  it('Trying to remove the wallet that does not exist - should be an error', async function() {
+  it('Trying to remove the wallet that does not exist - should be an error', async function () {
     const [investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
-    await globalRegistryService.registerInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1);
-    await expect(globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.revertedWith('Unknown wallet');
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await expect(globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.revertedWith(
+      'Unknown wallet',
+    );
+  });
+});
+
+describe('Set Attribute', function () {
+  it('Should throw if already initialized', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(globalRegistryService.setAttribute('id', 1, 1, 1, 'hash')).to.be.revertedWithCustomError(
+      globalRegistryService,
+      'NotImplemented',
+    );
   });
 });

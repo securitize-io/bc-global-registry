@@ -182,7 +182,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         uint256 ,
         string memory
     ) public override returns (bool) {
-        return true;
+        revert NotImplemented();
     }
 
     function getAttributeValue(string memory, uint8) public pure override returns (uint256) {

@@ -63,4 +63,15 @@ describe('Proxy Upgrade: GlobalRegistryService -> GlobalRegistryServiceMockV2', 
     // Verify upgrade by calling a function only in V2
     await expect(upgraded.initRBAC()).to.be.revertedWithCustomError(upgraded, 'NotInitializing');
   });
+  it('should not allow upgrade proxy to GlobalRegistryServiceMockV2 if now admin', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [, otherOwner] = await hre.ethers.getSigners();
+    await globalRegistryService.changeAdmin(otherOwner);
+    const GlobalRegistryServiceMockV2 = await hre.ethers.getContractFactory('GlobalRegistryServiceMockV2');
+
+    // Verify upgrade by calling a function only in V2
+    await expect(
+      hre.upgrades.upgradeProxy(globalRegistryService.target, GlobalRegistryServiceMockV2),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
+  });
 });

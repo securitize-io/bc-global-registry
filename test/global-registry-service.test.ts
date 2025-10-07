@@ -125,6 +125,19 @@ describe('CRUD investor', function () {
       .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
   });
 
+  it('Should remove an investor', async function () {
+    const [, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    await expect(
+      globalRegistryService.removeInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'InvestorHasWallets');
+  });
+
   it('Trying to register an investor with empty id - should be an error', async function () {
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(
@@ -325,18 +338,18 @@ describe('Wallets', function () {
   });
 
   it('Trying to return information about two investors', async function () {
-    const [owner, investor, investor2] = await hre.ethers.getSigners();
+    const [, investor, investor2] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
     expect(await globalRegistryService.isWallet(investor)).to.equal(false);
     expect(await globalRegistryService.isWallet(investor2)).to.equal(false);
 
     await globalRegistryService.registerInvestor(
-        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
-        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
     );
     await globalRegistryService.registerInvestor(
-        INVESTORS.INVESTOR_ID.INVESTOR_ID_2,
-        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_2,
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_2,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_2,
     );
     await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
     await globalRegistryService.addWallet(investor2, INVESTORS.INVESTOR_ID.INVESTOR_ID_2);
@@ -360,5 +373,10 @@ describe('Not implemented features', function () {
       globalRegistryService,
       'NotImplemented',
     );
+  });
+  it('Should return empty strings', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    expect(await globalRegistryService.getCountry('id')).to.equal('');
+    expect(await globalRegistryService.getCollisionHash('id')).to.equal('');
   });
 });

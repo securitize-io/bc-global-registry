@@ -170,6 +170,11 @@ describe('CRUD investor', function () {
     ).to.be.revertedWithCustomError(globalRegistryService, 'InvestorHasWallets');
   });
 
+  it('Trying to remove an not existing investor', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(globalRegistryService.removeInvestor('nonExistingInvestorId')).to.revertedWith('Unknown investor');
+  });
+
   it('Trying to register an investor with empty id - should be an error', async function () {
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(
@@ -293,6 +298,14 @@ describe('Wallets', function () {
     const investorDetails = await globalRegistryService.getInvestorDetails(investor);
     expect(investorDetails[0]).to.equal(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
     expect(investorDetails[1]).to.equal('');
+  });
+
+  it('Trying to add wallet an not existing investor', async function () {
+    const [, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(globalRegistryService.addWallet(investor, 'nonExistingInvestorId')).to.revertedWith(
+      'Unknown investor',
+    );
   });
 
   it('Trying to remove a wallet', async function () {

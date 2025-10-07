@@ -52,3 +52,15 @@ describe(`Global Registry Service initialize`, () => {
     );
   });
 });
+
+describe('Proxy Upgrade: GlobalRegistryService -> GlobalRegistryServiceMockV2', () => {
+  it('should upgrade proxy to GlobalRegistryServiceMockV2', async () => {
+    const GlobalRegistryService = await hre.ethers.getContractFactory('GlobalRegistryService');
+    const proxy = await hre.upgrades.deployProxy(GlobalRegistryService, [], { initializer: 'initialize' });
+    const GlobalRegistryServiceMockV2 = await hre.ethers.getContractFactory('GlobalRegistryServiceMockV2');
+    const upgraded = await hre.upgrades.upgradeProxy(proxy.target, GlobalRegistryServiceMockV2);
+
+    // Verify upgrade by calling a function only in V2
+    await expect(upgraded.initRBAC()).to.be.revertedWithCustomError(upgraded, 'NotInitializing');
+  });
+});

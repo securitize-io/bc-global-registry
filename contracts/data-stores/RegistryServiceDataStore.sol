@@ -19,12 +19,6 @@
 pragma solidity 0.8.22;
 
 contract RegistryServiceDataStore {
-    struct Attribute {
-        uint256 value;
-        uint256 expiry;
-        string proofHash;
-    }
-
     struct Wallet {
         string owner;
         address creator;
@@ -32,15 +26,12 @@ contract RegistryServiceDataStore {
 
     struct Investor {
         string id;
-        string collisionHash;
         address creator;
-        string country;
         uint256 walletCount;
     }
 
     mapping(string investorId => Investor investor) internal investors;
     mapping(address walletAddress => Wallet wallet) internal investorsWallets;
-    mapping(string investorId => mapping(uint8 attributeId => Attribute attribute)) public attributes;
 
-    uint256[47] private __gap;
+    uint256[48] private __gap;
 }

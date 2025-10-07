@@ -73,7 +73,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         string calldata _collisionHash
     ) public override newInvestor(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
         address sender = _msgSender();
-        investors[_id] = Investor(_id, _collisionHash, sender, "", 0);
+        investors[_id] = Investor(_id, sender, 0);
 
         emit InvestorAdded(_id, sender);
 
@@ -85,10 +85,6 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
     ) public override investorExists(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
         if (investors[_id].walletCount > 0) {
             revert InvestorHasWallets();
-        }
-
-        for (uint8 index = 0; index < 16; index++) {
-            delete attributes[_id][index];
         }
 
         delete investors[_id];
@@ -118,20 +114,12 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
             registerInvestor(_id, _collisionHash);
         }
 
-        if (bytes(_country).length > 0) {
-            setCountry(_id, _country);
-        }
-
         for (uint256 i = 0; i < _wallets.length; i++) {
             if (isWallet(_wallets[i]) && !CommonUtils.isEqualString(getInvestor(_wallets[i]), _id)) {
                 revert WalletBelongsToAnotherInvestor();
             } else {
                 addWallet(_wallets[i], _id);
             }
-        }
-
-        for (uint256 i = 0; i < _attributeIds.length; i++) {
-            setAttribute(_id, _attributeIds[i], _attributeValues[i], _attributeExpirations[i], "");
         }
 
         return true;
@@ -153,7 +141,6 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
             string memory
         )
     {
-        string memory country = investors[_id].country;
         uint256[] memory attributeValues = new uint256[](4);
         uint256[] memory attributeExpiries = new uint256[](4);
         string[] memory attributeProofHashes = new string[](4);
@@ -163,7 +150,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
             attributeProofHashes[i] = getAttributeProofHash(_id, (uint8(2) ** i));
         }
         return (
-            country,
+            '',
             attributeValues,
             attributeExpiries,
             attributeProofHashes[0],
@@ -174,56 +161,40 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
     }
 
     function setCountry(
-        string calldata _id,
-        string memory _country
-    ) public override investorExists(_id) onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
-        string memory prevCountry = getCountry(_id);
-        if (!CommonUtils.isEqualString(prevCountry, _country)) {
-            investors[_id].country = _country;
-
-            emit DSRegistryServiceInvestorCountryChanged(_id, _country, msg.sender);
-        }
+        string calldata,
+        string memory
+    ) public override returns (bool) {
         return true;
     }
 
-    function getCountry(string memory _id) public view override returns (string memory) {
-        return investors[_id].country;
+    function getCountry(string memory) public view override returns (string memory) {
+        return '';
     }
 
-    function getCollisionHash(string calldata _id) public view override returns (string memory) {
-        return investors[_id].collisionHash;
+    function getCollisionHash(string calldata) public view override returns (string memory) {
+        return '';
     }
 
     function setAttribute(
-        string calldata _id,
-        uint8 _attributeId,
-        uint256 _value,
-        uint256 _expiry,
-        string memory _proofHash
-    ) public override investorExists(_id) onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
-        if (_attributeId >= 16) {
-            revert UnknownAttribute();
-        }
-
-        attributes[_id][_attributeId].value = _value;
-        attributes[_id][_attributeId].expiry = _expiry;
-        attributes[_id][_attributeId].proofHash = _proofHash;
-
-        emit DSRegistryServiceInvestorAttributeChanged(_id, _attributeId, _value, _expiry, _proofHash, msg.sender);
-
+        string calldata,
+        uint8,
+        uint256,
+        uint256 ,
+        string memory
+    ) public override returns (bool) {
         return true;
     }
 
-    function getAttributeValue(string memory _id, uint8 _attributeId) public view override returns (uint256) {
-        return attributes[_id][_attributeId].value;
+    function getAttributeValue(string memory, uint8) public pure override returns (uint256) {
+        return 0;
     }
 
-    function getAttributeExpiry(string memory _id, uint8 _attributeId) public view override returns (uint256) {
-        return attributes[_id][_attributeId].expiry;
+    function getAttributeExpiry(string memory, uint8) public pure override returns (uint256) {
+        return 0;
     }
 
-    function getAttributeProofHash(string memory _id, uint8 _attributeId) public view override returns (string memory) {
-        return attributes[_id][_attributeId].proofHash;
+    function getAttributeProofHash(string memory, uint8) public pure override returns (string memory) {
+        return '';
     }
 
     function addWallet(
@@ -271,22 +242,20 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         return !CommonUtils.isEmptyString(investors[_id].id);
     }
 
-    function isAccreditedInvestor(string calldata _id) external view override returns (bool) {
-        return getAttributeValue(_id, ACCREDITED) == APPROVED;
+    function isAccreditedInvestor(string calldata) external pure override returns (bool) {
+       return true;
     }
 
-    function isAccreditedInvestor(address _wallet) external view override returns (bool) {
-        string memory investor = investorsWallets[_wallet].owner;
-        return getAttributeValue(investor, ACCREDITED) == APPROVED;
+    function isAccreditedInvestor(address) external pure override returns (bool) {
+        return true;
     }
 
-    function isQualifiedInvestor(address _wallet) external view override returns (bool) {
-        string memory investor = investorsWallets[_wallet].owner;
-        return getAttributeValue(investor, QUALIFIED) == APPROVED;
+    function isQualifiedInvestor(address) external pure override returns (bool) {
+        return true;
     }
 
-    function isQualifiedInvestor(string calldata _id) external view override returns (bool) {
-        return getAttributeValue(_id, QUALIFIED) == APPROVED;
+    function isQualifiedInvestor(string calldata) external pure override returns (bool) {
+        return true;
     }
 
     function getInvestors(address _from, address _to) external view override returns (string memory, string memory) {

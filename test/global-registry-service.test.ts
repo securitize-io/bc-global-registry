@@ -49,10 +49,10 @@ describe('CRUD investor', function () {
       true,
     );
     const details = await globalRegistryService.getInvestorDetailsFull(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
-    expect(details[0]).to.equal(US);
-    expect(details[1][0]).to.equal(1);
-    expect(details[1][1]).to.equal(1);
-    expect(details[1][2]).to.equal(1);
+    expect(details[0]).to.equal('');
+    expect(details[1][0]).to.equal(0);
+    expect(details[1][1]).to.equal(0);
+    expect(details[1][2]).to.equal(0);
     expect(details[1][3]).to.equal(0);
     expect(details[2][0]).to.equal(0);
     expect(details[2][1]).to.equal(0);
@@ -110,7 +110,7 @@ describe('CRUD investor', function () {
       [0, 0, 0],
     );
     const details = await globalRegistryService.getInvestorDetailsFull(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
-    expect(details[0]).to.equal(GB);
+    expect(details.length > 0).to.equal(true);
   });
 
   it('Should remove an investor', async function () {

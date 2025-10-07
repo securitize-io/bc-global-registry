@@ -81,6 +81,9 @@ abstract contract IGlobalRegistryService {
      */
     event OperatorRevoked(address indexed operator);
 
+    /// @dev Thrown when a function is not implemented.
+    error NotImplemented();
+
     /// @dev Thrown when a zero address is provided where a valid address is required.
     error ZeroAddressInvalid();
 

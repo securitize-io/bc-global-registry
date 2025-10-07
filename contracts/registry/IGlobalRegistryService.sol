@@ -1,5 +1,3 @@
-pragma solidity 0.8.22;
-
 /**
  * Copyright 2025 Securitize Inc. All rights reserved.
  *
@@ -18,7 +16,11 @@ pragma solidity 0.8.22;
  * limitations under the License.
  */
 
-abstract contract IGlobalRegistryService {
+pragma solidity 0.8.22;
+
+import {IDSRegistryService} from "./IDSRegistryService.sol";
+
+abstract contract IGlobalRegistryService is IDSRegistryService {
     modifier addressNotZero(address _address) {
         if (_address == address(0)) {
             revert ZeroAddressInvalid();

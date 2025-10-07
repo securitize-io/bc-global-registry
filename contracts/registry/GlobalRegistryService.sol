@@ -25,7 +25,6 @@ import {IDSRegistryService} from "./IDSRegistryService.sol";
 import {RegistryServiceDataStore} from "../data-stores/RegistryServiceDataStore.sol";
 
 contract GlobalRegistryService is
-    IDSRegistryService,
     RegistryServiceDataStore,
     IGlobalRegistryService,
     BaseRBACContract
@@ -34,6 +33,8 @@ contract GlobalRegistryService is
     constructor() {
         _disableInitializers();
     }
+
+
 
     function initialize() public override onlyProxy initializer {
         __BaseRBACContract_init();

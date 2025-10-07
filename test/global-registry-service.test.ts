@@ -1,0 +1,202 @@
+import { expect } from 'chai';
+import hre from 'hardhat';
+import { loadFixture } from '@nomicfoundation/hardhat-toolbox/network-helpers';
+import { deployGRS } from './fixtures/fixture';
+import { INVESTORS } from './fixtures/investors-fixture';
+
+describe('CRUD investor', function () {
+  const US = 'US';
+  const GB = 'GB';
+  it('Should register the new investor', async function () {
+    const [owner] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService.registerInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      ),
+    )
+      .to.emit(globalRegistryService, 'InvestorAdded')
+      .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
+    expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
+  });
+
+  it('Should register the new full investor', async function () {
+    const [owner, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+
+    await expect(
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        [investor],
+        [1, 2, 4],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
+    )
+      .to.emit(globalRegistryService, 'InvestorAdded')
+      .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
+    expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
+    expect(await globalRegistryService.isWallet(investor)).to.equal(true);
+    expect(await globalRegistryService['isAccreditedInvestor(address)'](investor)).to.equal(true);
+    expect(await globalRegistryService['isAccreditedInvestor(string)'](INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(
+      true,
+    );
+    expect(await globalRegistryService['isQualifiedInvestor(address)'](investor)).to.equal(true);
+    expect(await globalRegistryService['isQualifiedInvestor(string)'](INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(
+      true,
+    );
+    const details = await globalRegistryService.getInvestorDetailsFull(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    expect(details[0]).to.equal(US);
+    expect(details[1][0]).to.equal(1);
+    expect(details[1][1]).to.equal(1);
+    expect(details[1][2]).to.equal(1);
+    expect(details[1][3]).to.equal(0);
+    expect(details[2][0]).to.equal(0);
+    expect(details[2][1]).to.equal(0);
+    expect(details[2][2]).to.equal(0);
+    expect(details[3]).to.equal('');
+    expect(details[4]).to.equal('');
+    expect(details[5]).to.equal('');
+  });
+
+  it('Should fail trying to register a new full investor because wallet already exists', async function () {
+    const [, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.updateInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      US,
+      [investor],
+      [1, 2, 4],
+      [1, 1, 1],
+      [0, 0, 0],
+    );
+
+    await expect(
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_2,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        [investor],
+        [1, 2, 4],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'WalletBelongsToAnotherInvestor');
+  });
+
+  it('Should update the investor', async function () {
+    const [, investor, investor2] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.updateInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      US,
+      [investor],
+      [1, 2, 4],
+      [1, 1, 1],
+      [0, 0, 0],
+    );
+    await globalRegistryService.updateInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      GB,
+      [investor2],
+      [1, 2, 4],
+      [1, 1, 1],
+      [0, 0, 0],
+    );
+    const details = await globalRegistryService.getInvestorDetailsFull(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    expect(details[0]).to.equal(GB);
+  });
+
+  it('Should remove an investor', async function () {
+    const [owner] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await expect(globalRegistryService.removeInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1))
+      .to.emit(globalRegistryService, 'InvestorRemoved')
+      .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
+  });
+
+  it('Trying to register an investor with empty id - should be an error', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService.registerInvestor('', INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1),
+    ).to.revertedWith('Investor id must not be empty');
+  });
+
+  it('Trying to register the same account twice - should be an error', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await expect(
+      globalRegistryService.registerInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      ),
+    ).revertedWith('Investor already exists');
+  });
+
+  it('Trying to register the new investor using an account with NONE permissions - should be an error', async function () {
+    const [, unauthorizedWallet] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService
+        .connect(unauthorizedWallet)
+        .registerInvestor(
+          INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+          INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
+  });
+
+  it('Should not allow register investor when GlobalRegistryService is paused', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.pause();
+    await expect(
+      globalRegistryService.registerInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      ),
+    ).to.revertedWithCustomError(globalRegistryService, 'EnforcedPause');
+  });
+
+  it('Should not allow update investor when GlobalRegistryService is paused', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.pause();
+    const [, investor] = await hre.ethers.getSigners();
+    await expect(
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        [investor],
+        [1, 2, 4],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
+    ).to.revertedWithCustomError(globalRegistryService, 'EnforcedPause');
+  });
+
+  it('Should not allow remove investor when GlobalRegistryService is paused', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await globalRegistryService.pause();
+    await expect(globalRegistryService.removeInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.revertedWithCustomError(
+      globalRegistryService,
+      'EnforcedPause',
+    );
+  });
+});

@@ -24,17 +24,11 @@ import {CommonUtils} from "../utils/CommonUtils.sol";
 import {IDSRegistryService} from "./IDSRegistryService.sol";
 import {RegistryServiceDataStore} from "../data-stores/RegistryServiceDataStore.sol";
 
-contract GlobalRegistryService is
-    RegistryServiceDataStore,
-    IGlobalRegistryService,
-    BaseRBACContract
-{
+contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryService, BaseRBACContract {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
-
-
 
     function initialize() public override onlyProxy initializer {
         __BaseRBACContract_init();

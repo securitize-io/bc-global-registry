@@ -62,6 +62,38 @@ describe('CRUD investor', function () {
     expect(details[5]).to.equal('');
   });
 
+  it('Should fail trying to register investor with wrong param length', async function () {
+    const [, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_2,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        [investor],
+        [1, 2],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'ParameterLengthMismatch');
+  });
+
+  it('Should fail trying to register investor with wrong param length', async function () {
+    const [, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_2,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        [investor],
+        [1, 2, 1],
+        [1, 1, 1],
+        [0, 0],
+      ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'ParameterLengthMismatch');
+  });
+
   it('Should fail trying to register a new full investor because wallet already exists', async function () {
     const [, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
@@ -258,6 +290,9 @@ describe('Wallets', function () {
       .to.emit(globalRegistryService, 'WalletAdded')
       .withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
+    const investorDetails = await globalRegistryService.getInvestorDetails(investor);
+    expect(investorDetails[0]).to.equal(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    expect(investorDetails[1]).to.equal('');
   });
 
   it('Trying to remove a wallet', async function () {

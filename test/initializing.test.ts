@@ -3,7 +3,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-toolbox/network-helpers';
 import { deployGRS } from './fixtures/fixture';
 import hre from 'hardhat';
 
-describe.only(`Global Registry Service initialize`, () => {
+describe(`Global Registry Service initialize`, () => {
   it('Should throw if already initialized', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(globalRegistryService.initialize()).to.be.revertedWithCustomError(

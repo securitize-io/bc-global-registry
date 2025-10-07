@@ -6,6 +6,7 @@ import 'solidity-docgen';
 import 'dotenv/config';
 import './tasks/deploy-all';
 import './tasks/deploy-grs';
+import './tasks/deploy-grs-mock-v2';
 
 const config: HardhatUserConfig = {
   mocha: {

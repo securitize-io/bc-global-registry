@@ -44,4 +44,11 @@ describe(`Global Registry Service initialize`, () => {
       'UUPSUnauthorizedCallContext',
     );
   });
+  it('Should throw if __BaseRBACContract_init is calling during not initialize time', async () => {
+    const { globalRegistryServiceMockV2 } = await loadFixture(deployGRS);
+    await expect(globalRegistryServiceMockV2.initRBAC()).to.be.revertedWithCustomError(
+      globalRegistryServiceMockV2,
+      'NotInitializing',
+    );
+  });
 });

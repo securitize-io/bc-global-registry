@@ -6,6 +6,7 @@ import hre from 'hardhat';
 describe(`Global Registry Service initialize`, () => {
   it('Should throw if already initialized', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
+    expect(await globalRegistryService.getInitializedVersion()).to.equal(1);
     await expect(globalRegistryService.initialize()).to.be.revertedWithCustomError(
       globalRegistryService,
       'InvalidInitialization',

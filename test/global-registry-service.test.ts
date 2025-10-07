@@ -326,6 +326,33 @@ describe('Wallets', function () {
     ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
   });
 
+  it('Should not allow add wallet when GlobalRegistryService is paused', async () => {
+    const [, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await globalRegistryService.pause();
+    await expect(
+      globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.revertedWithCustomError(globalRegistryService, 'EnforcedPause');
+  });
+
+  it('Should not allow remove wallet when GlobalRegistryService is paused', async () => {
+    const [, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    await globalRegistryService.pause();
+    await expect(
+      globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.revertedWithCustomError(globalRegistryService, 'EnforcedPause');
+  });
+
   it('Trying to add the same wallet - should be an error', async function () {
     const [investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);

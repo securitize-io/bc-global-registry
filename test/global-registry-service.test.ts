@@ -323,6 +323,27 @@ describe('Wallets', function () {
       'Unknown wallet',
     );
   });
+
+  it('Trying to return information about two investors', async function () {
+    const [owner, investor, investor2] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    expect(await globalRegistryService.isWallet(investor)).to.equal(false);
+    expect(await globalRegistryService.isWallet(investor2)).to.equal(false);
+
+    await globalRegistryService.registerInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await globalRegistryService.registerInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_2,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_2,
+    );
+    await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    await globalRegistryService.addWallet(investor2, INVESTORS.INVESTOR_ID.INVESTOR_ID_2);
+    const investors = await globalRegistryService.getInvestors(investor, investor2);
+    expect(investors[0]).to.equal(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    expect(investors[1]).to.equal(INVESTORS.INVESTOR_ID.INVESTOR_ID_2);
+  });
 });
 
 describe('Not implemented features', function () {

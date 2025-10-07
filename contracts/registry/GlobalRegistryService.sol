@@ -80,7 +80,7 @@ contract GlobalRegistryService is
         address sender = _msgSender();
         investors[_id] = Investor(_id, _collisionHash, sender, "", 0);
 
-        emit DSRegistryServiceInvestorAdded(_id, sender);
+        emit InvestorAdded(_id, sender);
 
         return true;
     }
@@ -98,7 +98,7 @@ contract GlobalRegistryService is
 
         delete investors[_id];
 
-        emit DSRegistryServiceInvestorRemoved(_id, msg.sender);
+        emit InvestorRemoved(_id, msg.sender);
 
         return true;
     }
@@ -239,7 +239,7 @@ contract GlobalRegistryService is
         investorsWallets[_address] = Wallet(_id, sender);
         investors[_id].walletCount++;
 
-        emit DSRegistryServiceWalletAdded(_address, _id, sender);
+        emit WalletAdded(_address, _id, sender);
 
         return true;
     }
@@ -258,7 +258,7 @@ contract GlobalRegistryService is
         delete investorsWallets[_address];
         investors[_id].walletCount--;
 
-        emit DSRegistryServiceWalletRemoved(_address, _id, msg.sender);
+        emit WalletRemoved(_address, _id, msg.sender);
 
         return true;
     }

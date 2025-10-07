@@ -27,6 +27,40 @@ abstract contract IGlobalRegistryService {
     }
 
     /**
+     *  @notice Emitted when an investor is added.
+     *  @dev Indicates that the investor was added to Global Registry Service.
+     *  @param investorId string The unique identifier of the investor.
+     *  @param sender address The address that performed the action.
+     */
+    event InvestorAdded(string investorId, address sender);
+
+    /**
+     *  @notice Emitted when an investor is removed.
+     *  @dev Indicates that the investor was removed from Global Registry Service.
+     *  @param investorId string The unique identifier of the investor.
+     *  @param sender address The address that performed the action.
+     */
+    event InvestorRemoved(string investorId, address sender);
+
+
+    /**
+     *  @notice Emitted when a wallet is added to an investor.
+     *  @dev Indicates that a wallet was associated with an investor in Global Registry Service.
+     *  @param wallet string The unique identifier of the investor.
+     *  @param investorId string The unique identifier of the investor.
+     *  @param sender address The address that performed the action.
+     */
+    event WalletAdded(address wallet, string investorId, address sender);
+
+    /**
+     *  @notice Emitted when a wallet is removed from an investor.
+     *  @dev Indicates that a wallet was removed from an investor in Global Registry Service.
+     *  @param wallet string The unique identifier of the investor.
+     *  @param investorId string The unique identifier of the investor.
+     *  @param sender address The address that performed the action.
+     */
+    event WalletRemoved(address wallet, string investorId, address sender);
+    /**
      * @notice Emitted when the admin account is changed.
      * @dev Indicates that the Global Registry Service admin has been updated.
      * @param admin address The address of the new admin.

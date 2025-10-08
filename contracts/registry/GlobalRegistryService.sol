@@ -96,7 +96,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
 
     function updateInvestor(
         string calldata _id,
-        string calldata _collisionHash,
+        string calldata,
         string memory,
         address[] memory _wallets,
         uint8[] memory,
@@ -104,7 +104,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         uint256[] memory
     ) public override onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
         if (!isInvestor(_id)) {
-            registerInvestor(_id, _collisionHash);
+            registerInvestor(_id, _id);
         }
 
         for (uint8 i = 0; i < _wallets.length; i++) {

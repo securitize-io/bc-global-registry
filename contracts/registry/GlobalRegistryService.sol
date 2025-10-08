@@ -115,10 +115,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         return _updateInvestor(_id, _wallets);
     }
 
-    function _updateInvestor(
-        string calldata _id,
-        address[] memory _wallets
-    ) internal returns (bool) {
+    function _updateInvestor(string calldata _id, address[] memory _wallets) internal returns (bool) {
         if (!isInvestor(_id)) {
             registerInvestor(_id, _id);
         }

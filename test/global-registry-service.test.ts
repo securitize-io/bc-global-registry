@@ -490,6 +490,25 @@ describe('Pre Approved Transactions', function () {
       expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
       expect(await globalRegistryService.isWallet(investor)).to.equal(true);
     });
+    it('Should fail trying to add a global wallet without permissions', async function () {
+      const [, investor, unauthorizedWallet] = await hre.ethers.getSigners();
+      const { globalRegistryService } = await loadFixture(deployGRS);
+      // First registration
+      await globalRegistryService.registerInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 'hash1');
+      await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+      // Second registration with the same wallet but different investor id
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_2, await investor.getAddress()];
+      const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_2, grsParms);
+      const signature = await eip712GlobalRegistryService(
+        unauthorizedWallet,
+        await globalRegistryService.getAddress(),
+        txData,
+      );
+
+      await expect(
+        globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
+      ).to.be.revertedWithCustomError(globalRegistryService, 'InvalidEIP712SignatureError');
+    });
     it('Should fail trying to register a new full investor because wallet already exists', async function () {
       const [, investor, operator] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
@@ -522,7 +541,7 @@ describe('Pre Approved Transactions', function () {
       const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_2, grsParms);
       const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
       await expect(
-          globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
+        globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
       ).to.be.revertedWithCustomError(globalRegistryService, 'MaxWalletsReached');
     });
   });

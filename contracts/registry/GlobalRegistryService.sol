@@ -18,19 +18,33 @@
 
 pragma solidity 0.8.22;
 
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IGlobalRegistryService} from "./IGlobalRegistryService.sol";
 import {BaseRBACContract} from "../utils/BaseRBACContract.sol";
 import {CommonUtils} from "@securitize/digital_securities/contracts/utils/CommonUtils.sol";
 
 import {RegistryServiceDataStore} from "../data-stores/RegistryServiceDataStore.sol";
 
-contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryService, BaseRBACContract {
+contract GlobalRegistryService is RegistryServiceDataStore, EIP712Upgradeable, IGlobalRegistryService, BaseRBACContract {
+    using Address for address;
+    using ECDSA for bytes32;
+
+    string public constant NAME = "GlobalRegistryService";
+    string public constant VERSION = "1";
+
+    bytes32 private constant TXTYPE_HASH =
+    keccak256("ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce)");
+
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
     function initialize() public override onlyProxy initializer {
+        __EIP712_init(NAME, VERSION);
         __BaseRBACContract_init();
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
@@ -264,5 +278,35 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
 
     function isWallet(address _address) public view override returns (bool) {
         return isInvestor(getInvestor(_address));
+    }
+
+    function executePreApprovedTransaction(
+        bytes memory signature,
+        ExecutePreApprovedTransaction calldata txData
+    ) external whenNotPaused override {
+        bytes32 digest = hashTx(txData);
+        address signer = ECDSA.recover(digest, signature);
+
+        // Check recovered address role
+        if (!isOperator(signer)) {
+            revert InvalidEIP712SignatureError();
+        }
+        noncePerInvestor[txData.senderInvestor] = noncePerInvestor[txData.senderInvestor] + 1;
+        Address.functionCall(txData.destination, txData.data);
+    }
+
+    /// @dev Computes the digest to sign (EIP-712)
+    function hashTx(ExecutePreApprovedTransaction calldata txData) private view returns (bytes32) {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                TXTYPE_HASH,
+                keccak256(bytes(txData.senderInvestor)),
+                txData.destination,
+                keccak256(txData.data),
+                noncePerInvestor[txData.senderInvestor]
+            )
+        );
+
+        return _hashTypedDataV4(structHash);
     }
 }

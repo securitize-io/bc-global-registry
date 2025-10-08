@@ -18,7 +18,7 @@
 
 pragma solidity 0.8.22;
 
-import {IDSRegistryService} from "./IDSRegistryService.sol";
+import {IDSRegistryService} from "@securitize/digital_securities/contracts/registry/IDSRegistryService.sol";
 
 abstract contract IGlobalRegistryService is IDSRegistryService {
     modifier addressNotZero(address _address) {

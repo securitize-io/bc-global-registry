@@ -42,6 +42,7 @@
     "dotenv": "^17.2.3",
     "eslint": "^8.42.0",
     "eslint-plugin-prettier": "^5.0.0",
-    "solidity-docgen": "^0.6.0-beta.36"
+    "solidity-docgen": "^0.6.0-beta.36",
+    "@securitize/digital_securities": "4.0.0"
   }
 }

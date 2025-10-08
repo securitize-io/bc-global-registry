@@ -20,8 +20,8 @@ pragma solidity 0.8.22;
 
 import {IGlobalRegistryService} from "./IGlobalRegistryService.sol";
 import {BaseRBACContract} from "../utils/BaseRBACContract.sol";
-import {CommonUtils} from "../utils/CommonUtils.sol";
-import {IDSRegistryService} from "./IDSRegistryService.sol";
+import {CommonUtils} from "@securitize/digital_securities/contracts/utils/CommonUtils.sol";
+
 import {RegistryServiceDataStore} from "../data-stores/RegistryServiceDataStore.sol";
 
 contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryService, BaseRBACContract {

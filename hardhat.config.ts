@@ -50,11 +50,6 @@ const config: HardhatUserConfig = {
       url: process.env.OPTIMISM_RPC_URL ?? '',
       accounts: [process.env.DEPLOYER_PRIV_KEY!].filter((x) => x),
     },
-    convergeSepolia: {
-      chainId: 52085145,
-      url: process.env.COVERGE_SEPOLIA_RPC_URL ?? '',
-      accounts: [process.env.DEPLOYER_PRIV_KEY!].filter((x) => x),
-    },
   },
 };
 

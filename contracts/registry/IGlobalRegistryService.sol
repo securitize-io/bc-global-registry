@@ -110,6 +110,15 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
     /**
+     * @notice Registers a new investor and a wallet in the Global Registry Service.
+     * @dev Adds a new investor if it does not exists with the provided ID and metadata. Emits {GlobalInvestorAdded}.
+     * It also Associates the provided wallet with the investor. Emits {GlobalWalletAdded}.
+     * @param _id string The unique identifier for the investor.
+     * @param _wallet address The wallet to associate to investor.
+     * @return True if the investor was successfully registered, false otherwise.
+     */
+    function addGlobalInvestorWallet(string memory _id, address _wallet) external virtual returns (bool);
+    /**
      * @notice Checks if an account holds the Operator role.
      * @dev Returns true if the given account has the Operator role.
      * @param _account address The address to check for the Operator role.

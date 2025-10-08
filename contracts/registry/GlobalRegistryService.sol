@@ -94,6 +94,15 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         return true;
     }
 
+    function addGlobalInvestorWallet(
+        string calldata _id,
+        address _wallet
+    ) external override onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
+        address[] memory _wallets = new address[](1);
+        _wallets[0] = _wallet;
+        return _updateInvestor(_id, _wallets);
+    }
+
     function updateInvestor(
         string calldata _id,
         string calldata,
@@ -103,6 +112,13 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         uint256[] memory,
         uint256[] memory
     ) public override onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
+        return _updateInvestor(_id, _wallets);
+    }
+
+    function _updateInvestor(
+        string calldata _id,
+        address[] memory _wallets
+    ) internal returns (bool) {
         if (!isInvestor(_id)) {
             registerInvestor(_id, _id);
         }

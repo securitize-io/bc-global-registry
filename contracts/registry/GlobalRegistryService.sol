@@ -75,7 +75,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         address sender = _msgSender();
         investors[_id] = Investor(_id, sender, 0);
 
-        emit InvestorAdded(_id, sender);
+        emit GlobalInvestorAdded(_id, sender);
 
         return true;
     }
@@ -89,7 +89,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
 
         delete investors[_id];
 
-        emit InvestorRemoved(_id, msg.sender);
+        emit GlobalInvestorRemoved(_id, msg.sender);
 
         return true;
     }
@@ -192,7 +192,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         investorsWallets[_address] = Wallet(_id, sender);
         investors[_id].walletCount++;
 
-        emit WalletAdded(_address, _id, sender);
+        emit GlobalWalletAdded(_address, _id, sender);
 
         return true;
     }
@@ -212,7 +212,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         delete investorsWallets[_address];
         investors[_id].walletCount--;
 
-        emit WalletRemoved(_address, _id, msg.sender);
+        emit GlobalWalletRemoved(_address, _id, msg.sender);
 
         return true;
     }

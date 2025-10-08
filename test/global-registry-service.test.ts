@@ -16,7 +16,7 @@ describe('CRUD investor', function () {
         INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
       ),
     )
-      .to.emit(globalRegistryService, 'InvestorAdded')
+      .to.emit(globalRegistryService, 'GlobalInvestorAdded')
       .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
   });
@@ -36,7 +36,7 @@ describe('CRUD investor', function () {
         [0, 0, 0],
       ),
     )
-      .to.emit(globalRegistryService, 'InvestorAdded')
+      .to.emit(globalRegistryService, 'GlobalInvestorAdded')
       .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
@@ -121,7 +121,7 @@ describe('CRUD investor', function () {
       INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
     );
     await expect(globalRegistryService.removeInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1))
-      .to.emit(globalRegistryService, 'InvestorRemoved')
+      .to.emit(globalRegistryService, 'GlobalInvestorRemoved')
       .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
   });
 
@@ -260,7 +260,7 @@ describe('Wallets', function () {
       INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
     );
     await expect(globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1))
-      .to.emit(globalRegistryService, 'WalletAdded')
+      .to.emit(globalRegistryService, 'GlobalWalletAdded')
       .withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
     const investorDetails = await globalRegistryService.getInvestorDetails(investor);
@@ -286,7 +286,7 @@ describe('Wallets', function () {
     await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
     await expect(globalRegistryService.removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1))
-      .to.emit(globalRegistryService, 'WalletRemoved')
+      .to.emit(globalRegistryService, 'GlobalWalletRemoved')
       .withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isWallet(investor)).to.equal(false);
   });

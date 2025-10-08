@@ -466,14 +466,14 @@ describe('Pre Approved Transactions', function () {
       ).to.revertedWithCustomError(globalRegistryService, 'EnforcedPause');
     });
 
-    it('Should fail to addGlobalInvestorWallet if caller is not the same contract', async function () {
+    it('Should fail to add global investor wallet if caller is not the same contract', async function () {
       const [, investor] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
       await expect(
         globalRegistryService.addGlobalInvestorWallet(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, investor),
       ).revertedWithCustomError(globalRegistryService, 'OnlySelfError');
     });
-    it('Should register the new full investor with global interface', async function () {
+    it('Should register the new global investor wallet', async function () {
       const [, investor, operator] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
       const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress()];
@@ -509,7 +509,7 @@ describe('Pre Approved Transactions', function () {
         globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
       ).to.be.revertedWithCustomError(globalRegistryService, 'InvalidEIP712SignatureError');
     });
-    it('Should fail trying to register a new full investor because wallet already exists', async function () {
+    it('Should fail trying to register wallet that belongs to another investor', async function () {
       const [, investor, operator] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
       await globalRegistryService.addOperator(operator);
@@ -543,6 +543,18 @@ describe('Pre Approved Transactions', function () {
       await expect(
         globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
       ).to.be.revertedWithCustomError(globalRegistryService, 'MaxWalletsReached');
+    });
+    it('executePreApprovedTransaction should revert when GlobalRegistryService is paused', async function () {
+      const [, investor, operator] = await hre.ethers.getSigners();
+      const { globalRegistryService } = await loadFixture(deployGRS);
+      await globalRegistryService.pause();
+      await globalRegistryService.addOperator(operator);
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress()];
+      const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_2, grsParms);
+      const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
+      await expect(
+        globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
+      ).to.be.revertedWithCustomError(globalRegistryService, 'EnforcedPause');
     });
   });
 });

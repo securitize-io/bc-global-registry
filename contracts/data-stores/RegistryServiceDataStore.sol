@@ -32,6 +32,7 @@ contract RegistryServiceDataStore {
 
     mapping(string investorId => Investor investor) internal investors;
     mapping(address walletAddress => Wallet wallet) internal investorsWallets;
+    mapping(string => uint256) internal noncePerInvestor;
 
-    uint256[48] private __gap;
+    uint256[47] private __gap;
 }

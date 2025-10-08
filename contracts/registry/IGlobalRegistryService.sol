@@ -21,6 +21,16 @@ pragma solidity 0.8.22;
 import {IDSRegistryService} from "@securitize/digital_securities/contracts/registry/IDSRegistryService.sol";
 
 abstract contract IGlobalRegistryService is IDSRegistryService {
+    /**
+     * @dev Tx type - EIP712
+     */
+    struct ExecutePreApprovedTransaction {
+        string senderInvestor;
+        address destination;
+        bytes data;
+        uint256 nonce;
+    }
+
     modifier addressNotZero(address _address) {
         if (_address == address(0)) {
             revert ZeroAddressInvalid();
@@ -106,8 +116,23 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0xf67adce7
     error MaxWalletsReached();
 
+    /// @dev Thrown when an invalid EIP-712 signature is provided. For example signer is not OPERATOR
+    /// @custom:selector 0x6a567a1a
+    error InvalidEIP712SignatureError();
+
+    /// @dev Thrown when trying to execute a function that can only be called by the contract itself.
+    /// @custom:selector 0x28a2ea3b
+    error OnlySelfError();
+
     /// @dev Constant role identifier for the operator role.
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+
+    /**
+     * @dev Returns nonce per investor
+     * @param _investorId string (blockchainId).
+     * @return nonce
+     */
+    function nonceByInvestor(string memory _investorId) public view virtual returns (uint256);
 
     /**
      * @notice Registers a new investor and a wallet in the Global Registry Service.
@@ -118,6 +143,16 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      * @return True if the investor was successfully registered, false otherwise.
      */
     function addGlobalInvestorWallet(string memory _id, address _wallet) external virtual returns (bool);
+    /**
+     * @dev Validates off-chain EIP-712 message signature and executes encoded transaction data.
+     * @param signature - eip712 signature
+     * @param txData - tx data
+     */
+    function executePreApprovedTransaction(
+        bytes memory signature,
+        ExecutePreApprovedTransaction calldata txData
+    ) external virtual;
+
     /**
      * @notice Checks if an account holds the Operator role.
      * @dev Returns true if the given account has the Operator role.

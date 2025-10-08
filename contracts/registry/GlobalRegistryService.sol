@@ -18,19 +18,44 @@
 
 pragma solidity 0.8.22;
 
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IGlobalRegistryService} from "./IGlobalRegistryService.sol";
 import {BaseRBACContract} from "../utils/BaseRBACContract.sol";
 import {CommonUtils} from "@securitize/digital_securities/contracts/utils/CommonUtils.sol";
 
 import {RegistryServiceDataStore} from "../data-stores/RegistryServiceDataStore.sol";
 
-contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryService, BaseRBACContract {
+contract GlobalRegistryService is
+    RegistryServiceDataStore,
+    EIP712Upgradeable,
+    IGlobalRegistryService,
+    BaseRBACContract
+{
+    using Address for address;
+    using ECDSA for bytes32;
+
+    string public constant NAME = "GlobalRegistryService";
+    string public constant VERSION = "1";
+
+    bytes32 private constant TXTYPE_HASH =
+        keccak256("ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce)");
+
+    modifier onlySelf() {
+        if (_msgSender() != address(this)) {
+            revert OnlySelfError();
+        }
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
     function initialize() public override onlyProxy initializer {
+        __EIP712_init(NAME, VERSION);
         __BaseRBACContract_init();
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
@@ -72,6 +97,10 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         string calldata _id,
         string calldata
     ) public override newInvestor(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
+        return _registerInvestor(_id, _id);
+    }
+
+    function _registerInvestor(string calldata _id, string calldata) internal returns (bool) {
         address sender = _msgSender();
         investors[_id] = Investor(_id, sender, 0);
 
@@ -97,7 +126,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
     function addGlobalInvestorWallet(
         string calldata _id,
         address _wallet
-    ) external override onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
+    ) external override whenNotPaused onlySelf returns (bool) {
         address[] memory _wallets = new address[](1);
         _wallets[0] = _wallet;
         return _updateInvestor(_id, _wallets);
@@ -117,14 +146,14 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
 
     function _updateInvestor(string calldata _id, address[] memory _wallets) internal returns (bool) {
         if (!isInvestor(_id)) {
-            registerInvestor(_id, _id);
+            _registerInvestor(_id, _id);
         }
 
         for (uint8 i = 0; i < _wallets.length; i++) {
             if (isWallet(_wallets[i]) && !CommonUtils.isEqualString(getInvestor(_wallets[i]), _id)) {
                 revert WalletBelongsToAnotherInvestor();
             } else {
-                addWallet(_wallets[i], _id);
+                _addWallet(_wallets[i], _id);
             }
         }
 
@@ -198,6 +227,10 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         address _address,
         string memory _id
     ) public override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(_id) newWallet(_address) returns (bool) {
+        return _addWallet(_address, _id);
+    }
+
+    function _addWallet(address _address, string memory _id) internal returns (bool) {
         if (investors[_id].walletCount >= type(uint8).max) {
             revert MaxWalletsReached();
         }
@@ -208,6 +241,10 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         emit GlobalWalletAdded(_address, _id, sender);
 
         return true;
+    }
+
+    function nonceByInvestor(string memory _investorId) public view override returns (uint256) {
+        return noncePerInvestor[_investorId];
     }
 
     function removeWallet(
@@ -264,5 +301,35 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
 
     function isWallet(address _address) public view override returns (bool) {
         return isInvestor(getInvestor(_address));
+    }
+
+    function executePreApprovedTransaction(
+        bytes memory signature,
+        ExecutePreApprovedTransaction calldata txData
+    ) external override whenNotPaused {
+        bytes32 digest = hashTx(txData);
+        address signer = ECDSA.recover(digest, signature);
+
+        // Check recovered address role
+        if (!isOperator(signer)) {
+            revert InvalidEIP712SignatureError();
+        }
+        noncePerInvestor[txData.senderInvestor] = noncePerInvestor[txData.senderInvestor] + 1;
+        Address.functionCall(txData.destination, txData.data);
+    }
+
+    /// @dev Computes the digest to sign (EIP-712)
+    function hashTx(ExecutePreApprovedTransaction calldata txData) private view returns (bytes32) {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                TXTYPE_HASH,
+                keccak256(bytes(txData.senderInvestor)),
+                txData.destination,
+                keccak256(txData.data),
+                noncePerInvestor[txData.senderInvestor]
+            )
+        );
+
+        return _hashTypedDataV4(structHash);
     }
 }

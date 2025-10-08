@@ -27,7 +27,12 @@ import {CommonUtils} from "@securitize/digital_securities/contracts/utils/Common
 
 import {RegistryServiceDataStore} from "../data-stores/RegistryServiceDataStore.sol";
 
-contract GlobalRegistryService is RegistryServiceDataStore, EIP712Upgradeable, IGlobalRegistryService, BaseRBACContract {
+contract GlobalRegistryService is
+    RegistryServiceDataStore,
+    EIP712Upgradeable,
+    IGlobalRegistryService,
+    BaseRBACContract
+{
     using Address for address;
     using ECDSA for bytes32;
 
@@ -35,8 +40,14 @@ contract GlobalRegistryService is RegistryServiceDataStore, EIP712Upgradeable, I
     string public constant VERSION = "1";
 
     bytes32 private constant TXTYPE_HASH =
-    keccak256("ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce)");
+        keccak256("ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce)");
 
+    modifier onlySelf() {
+        if (_msgSender() != address(this)) {
+            revert OnlySelfError();
+        }
+        _;
+    }
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -86,6 +97,10 @@ contract GlobalRegistryService is RegistryServiceDataStore, EIP712Upgradeable, I
         string calldata _id,
         string calldata
     ) public override newInvestor(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
+        return _registerInvestor(_id, _id);
+    }
+
+    function _registerInvestor(string calldata _id, string calldata) internal returns (bool) {
         address sender = _msgSender();
         investors[_id] = Investor(_id, sender, 0);
 
@@ -111,7 +126,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, EIP712Upgradeable, I
     function addGlobalInvestorWallet(
         string calldata _id,
         address _wallet
-    ) external override onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
+    ) external override whenNotPaused onlySelf returns (bool) {
         address[] memory _wallets = new address[](1);
         _wallets[0] = _wallet;
         return _updateInvestor(_id, _wallets);
@@ -131,14 +146,14 @@ contract GlobalRegistryService is RegistryServiceDataStore, EIP712Upgradeable, I
 
     function _updateInvestor(string calldata _id, address[] memory _wallets) internal returns (bool) {
         if (!isInvestor(_id)) {
-            registerInvestor(_id, _id);
+            _registerInvestor(_id, _id);
         }
 
         for (uint8 i = 0; i < _wallets.length; i++) {
             if (isWallet(_wallets[i]) && !CommonUtils.isEqualString(getInvestor(_wallets[i]), _id)) {
                 revert WalletBelongsToAnotherInvestor();
             } else {
-                addWallet(_wallets[i], _id);
+                _addWallet(_wallets[i], _id);
             }
         }
 
@@ -212,6 +227,10 @@ contract GlobalRegistryService is RegistryServiceDataStore, EIP712Upgradeable, I
         address _address,
         string memory _id
     ) public override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(_id) newWallet(_address) returns (bool) {
+        return _addWallet(_address, _id);
+    }
+
+    function _addWallet(address _address, string memory _id) internal returns (bool) {
         if (investors[_id].walletCount >= type(uint8).max) {
             revert MaxWalletsReached();
         }
@@ -222,6 +241,10 @@ contract GlobalRegistryService is RegistryServiceDataStore, EIP712Upgradeable, I
         emit GlobalWalletAdded(_address, _id, sender);
 
         return true;
+    }
+
+    function nonceByInvestor(string memory _investorId) public view override returns (uint256) {
+        return noncePerInvestor[_investorId];
     }
 
     function removeWallet(
@@ -283,7 +306,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, EIP712Upgradeable, I
     function executePreApprovedTransaction(
         bytes memory signature,
         ExecutePreApprovedTransaction calldata txData
-    ) external whenNotPaused override {
+    ) external override whenNotPaused {
         bytes32 digest = hashTx(txData);
         address signer = ECDSA.recover(digest, signature);
 

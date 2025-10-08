@@ -117,10 +117,22 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     error MaxWalletsReached();
 
     /// @dev Thrown when an invalid EIP-712 signature is provided. For example signer is not OPERATOR
+    /// @custom:selector 0x6a567a1a
     error InvalidEIP712SignatureError();
+
+    /// @dev Thrown when trying to execute a function that can only be called by the contract itself.
+    /// @custom:selector 0x28a2ea3b
+    error OnlySelfError();
 
     /// @dev Constant role identifier for the operator role.
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+
+    /**
+     * @dev Returns nonce per investor
+     * @param _investorId string (blockchainId).
+     * @return nonce
+     */
+    function nonceByInvestor(string memory _investorId) public view virtual returns (uint256);
 
     /**
      * @notice Registers a new investor and a wallet in the Global Registry Service.

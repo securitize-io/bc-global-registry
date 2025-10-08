@@ -114,7 +114,7 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
             registerInvestor(_id, _collisionHash);
         }
 
-        for (uint256 i = 0; i < _wallets.length; i++) {
+        for (uint8 i = 0; i < _wallets.length; i++) {
             if (isWallet(_wallets[i]) && !CommonUtils.isEqualString(getInvestor(_wallets[i]), _id)) {
                 revert WalletBelongsToAnotherInvestor();
             } else {
@@ -192,6 +192,9 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         address _address,
         string memory _id
     ) public override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(_id) newWallet(_address) returns (bool) {
+        if (investors[_id].walletCount >= type(uint8).max) {
+            revert MaxWalletsReached();
+        }
         address sender = _msgSender();
         investorsWallets[_address] = Wallet(_id, sender);
         investors[_id].walletCount++;

@@ -331,6 +331,22 @@ describe('Wallets', function () {
     ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
   });
 
+  it('should revert with MaxWalletsReached when adding wallet over the limit', async function () {
+    const [, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    for (let i = 0; i < 255; i++) {
+      const extraWallet = hre.ethers.Wallet.createRandom().address;
+      await globalRegistryService.addWallet(extraWallet, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    }
+    await expect(
+      globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'MaxWalletsReached');
+  });
+
   it('Trying to remove the wallet with unauthorized wallet', async function () {
     const [, unauthorized, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);

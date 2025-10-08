@@ -106,6 +106,10 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x7d76f995
     error UnknownAttribute();
 
+    /// @dev Thrown when trying to add a wallet but the maximum number of wallets for the investor has been reached.
+    /// @custom:selector 0xf67adce7
+    error MaxWalletsReached();
+
     /// @dev Constant role identifier for the operator role.
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 

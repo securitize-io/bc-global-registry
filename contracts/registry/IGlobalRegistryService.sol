@@ -83,21 +83,27 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     event OperatorRevoked(address indexed operator);
 
     /// @dev Thrown when a function is not implemented.
+    /// @custom:selector 0xd6234725
     error NotImplemented();
 
     /// @dev Thrown when a zero address is provided where a valid address is required.
+    /// @custom:selector 0x14c880ca
     error ZeroAddressInvalid();
 
     /// @dev Thrown when the length of provided parameters does not match the expected length.
+    /// @custom:selector 0xb1c97b39
     error ParameterLengthMismatch();
 
     /// @dev Thrown when attempting to register a wallet that is already associated with another investor.
+    /// @custom:selector 0x78a65e20
     error WalletBelongsToAnotherInvestor();
 
     /// @dev Thrown when attempting to remove an investor that still has associated wallets.
+    /// @custom:selector 0xcf7758a4
     error InvestorHasWallets();
 
     /// @dev Thrown when an operation is attempted on a non-existent investor attribute
+    /// @custom:selector 0x7d76f995
     error UnknownAttribute();
 
     /// @dev Constant role identifier for the operator role.

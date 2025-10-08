@@ -99,17 +99,10 @@ contract GlobalRegistryService is RegistryServiceDataStore, IGlobalRegistryServi
         string calldata _collisionHash,
         string memory,
         address[] memory _wallets,
-        uint8[] memory _attributeIds,
-        uint256[] memory _attributeValues,
-        uint256[] memory _attributeExpirations
+        uint8[] memory,
+        uint256[] memory,
+        uint256[] memory
     ) public override onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
-        if (_attributeValues.length != _attributeIds.length) {
-            revert ParameterLengthMismatch();
-        }
-        if (_attributeIds.length != _attributeExpirations.length) {
-            revert ParameterLengthMismatch();
-        }
-
         if (!isInvestor(_id)) {
             registerInvestor(_id, _collisionHash);
         }

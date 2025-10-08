@@ -90,10 +90,6 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x14c880ca
     error ZeroAddressInvalid();
 
-    /// @dev Thrown when the length of provided parameters does not match the expected length.
-    /// @custom:selector 0xb1c97b39
-    error ParameterLengthMismatch();
-
     /// @dev Thrown when attempting to register a wallet that is already associated with another investor.
     /// @custom:selector 0x78a65e20
     error WalletBelongsToAnotherInvestor();

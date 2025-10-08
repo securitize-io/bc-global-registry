@@ -62,6 +62,17 @@ describe('CRUD investor', function () {
     expect(details[5]).to.equal('');
   });
 
+  it('Should register the new full investor with global interface', async function () {
+    const [owner, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+
+    await expect(globalRegistryService.addGlobalInvestorWallet(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, investor))
+      .to.emit(globalRegistryService, 'GlobalInvestorAdded')
+      .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
+    expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
+    expect(await globalRegistryService.isWallet(investor)).to.equal(true);
+  });
+
   it('Should fail trying to register a new full investor because wallet already exists', async function () {
     const [, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);

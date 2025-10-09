@@ -43,7 +43,7 @@ This mechanism enables workflows where **Operators** can authorize actions off-c
 
 ### Relevant Functions:
 
-- `addGlobalInvestorWallet`: Allows associating a wallet with an investor, typically by an Operator. It's the data to execute contained a pre-approved transaction.
+- `addGlobalInvestorWallet`: Allows associating a wallet with an investor, typically by an Operator. It's the data to execute contained a pre-approved transaction. It uses a block limit to manage the time that pre-approved transaction is valid.
 - `executePreApprovedTransaction`: Validates the Operator's EIP-712 signature and executes the pre-approved transaction, regardless of who submits it.
 
 ## Deployment

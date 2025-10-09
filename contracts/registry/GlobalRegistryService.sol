@@ -127,7 +127,7 @@ contract GlobalRegistryService is
         string calldata _id,
         address _wallet,
         uint256 _blockLimit
-    ) external override whenNotPaused onlySelf returns (bool) {
+    ) external override whenNotPaused onlySelf newWallet(_wallet) returns (bool) {
         if (_blockLimit < block.number) {
             revert TransactionTooOld();
         }

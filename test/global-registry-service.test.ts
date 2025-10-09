@@ -550,7 +550,7 @@ describe('Pre Approved Transactions', function () {
         globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
       ).to.be.revertedWithCustomError(globalRegistryService, 'InvalidEIP712Signature');
     });
-    it('Should fail trying to register wallet that belongs to another investor', async function () {
+    it('Should fail trying to register wallet that already exist', async function () {
       const [, investor, operator] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
       await globalRegistryService.addOperator(operator);
@@ -564,7 +564,7 @@ describe('Pre Approved Transactions', function () {
 
       await expect(
         globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
-      ).to.be.revertedWithCustomError(globalRegistryService, 'WalletBelongsToAnotherInvestor');
+      ).to.revertedWith('Wallet already exists');
     });
     it('should revert with MaxWalletsReached when adding global investor wallet', async function () {
       const [, investor, operator] = await hre.ethers.getSigners();

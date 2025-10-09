@@ -18,7 +18,7 @@
 
 pragma solidity 0.8.22;
 
-contract RegistryServiceDataStore {
+contract GlobalRegistryServiceDataStore {
     struct Wallet {
         string owner;
         address creator;
@@ -27,7 +27,7 @@ contract RegistryServiceDataStore {
     struct Investor {
         string id;
         address creator;
-        uint256 walletCount;
+        uint8 walletCount;
     }
 
     mapping(string investorId => Investor investor) internal investors;

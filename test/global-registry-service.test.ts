@@ -456,13 +456,22 @@ describe('Not implemented features', function () {
 });
 
 describe('Pre Approved Transactions', function () {
+  let blockNumber: number;
+  beforeEach(async function () {
+    const block = await hre.ethers.provider.getBlock('latest');
+    blockNumber = block?.number || 0;
+  });
   describe('addGlobalInvestorWallet method', function () {
     it('Should not allow add a global investor wallet when GlobalRegistryService is paused', async () => {
       const [, investor] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
       await globalRegistryService.pause();
       await expect(
-        globalRegistryService.addGlobalInvestorWallet(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, investor),
+        globalRegistryService.addGlobalInvestorWallet(
+          INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+          investor,
+          blockNumber + 1000,
+        ),
       ).to.revertedWithCustomError(globalRegistryService, 'EnforcedPause');
     });
 
@@ -470,13 +479,17 @@ describe('Pre Approved Transactions', function () {
       const [, investor] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
       await expect(
-        globalRegistryService.addGlobalInvestorWallet(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, investor),
+        globalRegistryService.addGlobalInvestorWallet(
+          INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+          investor,
+          blockNumber + 1000,
+        ),
       ).revertedWithCustomError(globalRegistryService, 'OnlySelfError');
     });
     it('Should register the new global investor wallet', async function () {
       const [, investor, operator] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
-      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress()];
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress(), blockNumber + 1000];
       await globalRegistryService.addOperator(operator);
       const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, grsParms);
       const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
@@ -490,6 +503,34 @@ describe('Pre Approved Transactions', function () {
       expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
       expect(await globalRegistryService.isWallet(investor)).to.equal(true);
     });
+    it('Should register the new global investor wallet when blockNumber is in the edge value', async function () {
+      const [, investor, operator] = await hre.ethers.getSigners();
+      const { globalRegistryService } = await loadFixture(deployGRS);
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress(), blockNumber];
+      await globalRegistryService.addOperator(operator);
+      const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, grsParms);
+      const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
+
+      await expect(globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData))
+        .emit(globalRegistryService, 'GlobalInvestorAdded')
+        .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await globalRegistryService.getAddress())
+        .emit(globalRegistryService, 'GlobalWalletAdded')
+        .withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await globalRegistryService.getAddress());
+
+      expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
+      expect(await globalRegistryService.isWallet(investor)).to.equal(true);
+    });
+    it('Should fail trying to add a global wallet with a transaction too old', async function () {
+      const [, investor, operator] = await hre.ethers.getSigners();
+      const { globalRegistryService } = await loadFixture(deployGRS);
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress(), blockNumber - 1];
+      await globalRegistryService.addOperator(operator);
+      const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, grsParms);
+      const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
+      await expect(
+        globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
+      ).to.be.revertedWithCustomError(globalRegistryService, 'TransactionTooOld');
+    });
     it('Should fail trying to add a global wallet without permissions', async function () {
       const [, investor, unauthorizedWallet] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
@@ -497,7 +538,7 @@ describe('Pre Approved Transactions', function () {
       await globalRegistryService.registerInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 'hash1');
       await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
       // Second registration with the same wallet but different investor id
-      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_2, await investor.getAddress()];
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_2, await investor.getAddress(), blockNumber + 1000];
       const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_2, grsParms);
       const signature = await eip712GlobalRegistryService(
         unauthorizedWallet,
@@ -507,7 +548,7 @@ describe('Pre Approved Transactions', function () {
 
       await expect(
         globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
-      ).to.be.revertedWithCustomError(globalRegistryService, 'InvalidEIP712SignatureError');
+      ).to.be.revertedWithCustomError(globalRegistryService, 'InvalidEIP712Signature');
     });
     it('Should fail trying to register wallet that belongs to another investor', async function () {
       const [, investor, operator] = await hre.ethers.getSigners();
@@ -517,7 +558,7 @@ describe('Pre Approved Transactions', function () {
       await globalRegistryService.registerInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 'hash1');
       await globalRegistryService.addWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
       // Second registration with the same wallet but different investor id
-      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_2, await investor.getAddress()];
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_2, await investor.getAddress(), blockNumber + 1000];
       const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_2, grsParms);
       const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
 
@@ -537,7 +578,7 @@ describe('Pre Approved Transactions', function () {
         const extraWallet = hre.ethers.Wallet.createRandom().address;
         await globalRegistryService.addWallet(extraWallet, INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
       }
-      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress()];
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress(), blockNumber + 1000];
       const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_2, grsParms);
       const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
       await expect(
@@ -549,7 +590,7 @@ describe('Pre Approved Transactions', function () {
       const { globalRegistryService } = await loadFixture(deployGRS);
       await globalRegistryService.pause();
       await globalRegistryService.addOperator(operator);
-      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress()];
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress(), blockNumber + 1000];
       const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_2, grsParms);
       const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
       await expect(

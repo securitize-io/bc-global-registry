@@ -9,7 +9,7 @@ task('add-investor-eip-712', 'Create a new EIP-712 signed message to add a new i
   .setAction(async (args, hre) => {
     await hre.run('compile');
 
-    const [,operator] = await hre.ethers.getSigners(); //configure process.env.OPERATOR_PRIV_KEY
+    const [,operator, investor] = await hre.ethers.getSigners(); //configure process.env.OPERATOR_PRIV_KEY
     console.log(`OPERATOR ${await operator.getAddress()}`)
     const globalRegistryService = await hre.ethers.getContractAt('GlobalRegistryService', args.grsaddress);
     if (!await globalRegistryService.isOperator(operator)) {
@@ -21,7 +21,8 @@ task('add-investor-eip-712', 'Create a new EIP-712 signed message to add a new i
     await globalRegistryService.addOperator(await operator.getAddress());
     const txData = await buildTypedData(globalRegistryService, args.investorid, grsParms);
     const signature = await eip712GlobalRegistryService(hre, operator, await globalRegistryService.getAddress(), txData);
-    console.log(`SIGNATURE: ${Signature}`);
+    const tx = await globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData);
+    console.log(`tx: ${tx.hash}`);
   });
 export const buildTypedData = async (globalRegistryService: Contract, investorId: string, grsParams: any) => {
     const data = globalRegistryService.interface.encodeFunctionData('addGlobalInvestorWallet', grsParams);

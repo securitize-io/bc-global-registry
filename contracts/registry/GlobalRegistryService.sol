@@ -234,7 +234,7 @@ contract GlobalRegistryService is
         return _addWallet(_address, _id);
     }
 
-    function _addWallet(address _address, string memory _id) internal returns (bool) {
+    function _addWallet(address _address, string memory _id) internal addressNotZero(_address) returns (bool) {
         if (investors[_id].walletCount >= type(uint8).max) {
             revert MaxWalletsReached();
         }
@@ -259,6 +259,7 @@ contract GlobalRegistryService is
         override
         onlyRole(OPERATOR_ROLE)
         whenNotPaused
+        addressNotZero(_address)
         walletExists(_address)
         walletBelongsToInvestor(_address, _id)
         returns (bool)

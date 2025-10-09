@@ -3,7 +3,7 @@ import hre from 'hardhat';
 import { loadFixture } from '@nomicfoundation/hardhat-toolbox/network-helpers';
 import { deployGRS } from './fixtures/fixture';
 import { INVESTORS } from './fixtures/investors-fixture';
-import { Contract } from 'ethers';
+import { Contract, ZeroAddress } from 'ethers';
 import { eip712GlobalRegistryService } from './eip-712.helper';
 
 const buildTypedData = async (globalRegistryService: Contract, investorId: string, grsParams: any) => {
@@ -101,6 +101,21 @@ describe('CRUD investor', function () {
         [0, 0, 0],
       ),
     ).to.be.revertedWithCustomError(globalRegistryService, 'WalletBelongsToAnotherInvestor');
+  });
+
+  it('Should fail trying to register a global investor and the zero address', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+        globalRegistryService.updateInvestor(
+            INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+            INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+            US,
+            [ZeroAddress],
+            [1, 2, 4],
+            [1, 1, 1],
+            [0, 0, 0],
+        ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'ZeroAddressInvalid');
   });
 
   it('Should update the investor', async function () {
@@ -291,6 +306,17 @@ describe('Wallets', function () {
     );
   });
 
+  it('Trying to add wallet with zero addrress', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.registerInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+    );
+    await expect(
+      globalRegistryService.addWallet(ZeroAddress, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).revertedWithCustomError(globalRegistryService, 'ZeroAddressInvalid');
+  });
+
   it('Trying to remove a wallet', async function () {
     const [owner, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
@@ -305,7 +331,6 @@ describe('Wallets', function () {
       .withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isWallet(investor)).to.equal(false);
   });
-
   it('Trying to add the wallet with unauthorized wallet', async function () {
     const [, unauthorized, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
@@ -337,7 +362,12 @@ describe('Wallets', function () {
       globalRegistryService.connect(unauthorized).removeWallet(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
     ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
   });
-
+  it('Trying to remove the wallet with zero address', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+        globalRegistryService.removeWallet(ZeroAddress, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'ZeroAddressInvalid');
+  });
   it('Should not allow add wallet when GlobalRegistryService is paused', async () => {
     const [, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
@@ -519,6 +549,17 @@ describe('Pre Approved Transactions', function () {
 
       expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
       expect(await globalRegistryService.isWallet(investor)).to.equal(true);
+    });
+    it('Should fail trying to add a global zero address wallet', async function () {
+      const [, investor, operator] = await hre.ethers.getSigners();
+      const { globalRegistryService } = await loadFixture(deployGRS);
+      const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, ZeroAddress, blockNumber + 5000];
+      await globalRegistryService.addOperator(operator);
+      const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, grsParms);
+      const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
+      await expect(
+          globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
+      ).to.be.revertedWithCustomError(globalRegistryService, 'ZeroAddressInvalid');
     });
     it('Should fail trying to add a global wallet with a transaction too old', async function () {
       const [, investor, operator] = await hre.ethers.getSigners();

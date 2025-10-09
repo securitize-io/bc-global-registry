@@ -8,6 +8,7 @@ import './tasks/deploy-all';
 import './tasks/deploy-grs';
 import './tasks/deploy-grs-mock-v2';
 import './tasks/verify-grs';
+import './tasks/add-global-investor-eip-712-sign';
 
 const config: HardhatUserConfig = {
   mocha: {

@@ -6,7 +6,7 @@ import { INVESTORS } from './fixtures/investors-fixture';
 import { Contract, ZeroAddress } from 'ethers';
 import { eip712GlobalRegistryService } from './eip-712.helper';
 
-const buildTypedData = async (globalRegistryService: Contract, investorId: string, grsParams: any) => {
+export const buildTypedData = async (globalRegistryService: Contract, investorId: string, grsParams: any) => {
   const data = globalRegistryService.interface.encodeFunctionData('addGlobalInvestorWallet', grsParams);
   const nonce = await globalRegistryService.nonceByInvestor(investorId);
 

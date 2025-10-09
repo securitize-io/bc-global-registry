@@ -125,8 +125,12 @@ contract GlobalRegistryService is
 
     function addGlobalInvestorWallet(
         string calldata _id,
-        address _wallet
+        address _wallet,
+        uint256 _blockLimit
     ) external override whenNotPaused onlySelf returns (bool) {
+        if (_blockLimit < block.number) {
+            revert TransactionTooOld();
+        }
         address[] memory _wallets = new address[](1);
         _wallets[0] = _wallet;
         return _updateInvestor(_id, _wallets);
@@ -312,7 +316,7 @@ contract GlobalRegistryService is
 
         // Check recovered address role
         if (!isOperator(signer)) {
-            revert InvalidEIP712SignatureError();
+            revert InvalidEIP712Signature();
         }
         noncePerInvestor[txData.senderInvestor] = noncePerInvestor[txData.senderInvestor] + 1;
         Address.functionCall(txData.destination, txData.data);

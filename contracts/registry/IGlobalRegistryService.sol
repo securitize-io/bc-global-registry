@@ -116,9 +116,13 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0xf67adce7
     error MaxWalletsReached();
 
+    /// @dev Thrown when a transaction's block limit has been exceeded.
+    /// @custom:selector 0xa83116fc
+    error TransactionTooOld();
+
     /// @dev Thrown when an invalid EIP-712 signature is provided. For example signer is not OPERATOR
-    /// @custom:selector 0x6a567a1a
-    error InvalidEIP712SignatureError();
+    /// @custom:selector 0xb81d58e7
+    error InvalidEIP712Signature();
 
     /// @dev Thrown when trying to execute a function that can only be called by the contract itself.
     /// @custom:selector 0x28a2ea3b
@@ -140,9 +144,10 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      * It also Associates the provided wallet with the investor. Emits {GlobalWalletAdded}.
      * @param _id string The unique identifier for the investor.
      * @param _wallet address The wallet to associate to investor.
+     * @param _blockLimit uint256 The block number until which the transaction is valid.
      * @return True if the investor was successfully registered, false otherwise.
      */
-    function addGlobalInvestorWallet(string memory _id, address _wallet) external virtual returns (bool);
+    function addGlobalInvestorWallet(string memory _id, address _wallet, uint256 _blockLimit) external virtual returns (bool);
     /**
      * @dev Validates off-chain EIP-712 message signature and executes encoded transaction data.
      * @param signature - eip712 signature

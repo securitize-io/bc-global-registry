@@ -25,10 +25,10 @@ import {IGlobalRegistryService} from "./IGlobalRegistryService.sol";
 import {BaseRBACContract} from "../utils/BaseRBACContract.sol";
 import {CommonUtils} from "@securitize/digital_securities/contracts/utils/CommonUtils.sol";
 
-import {RegistryServiceDataStore} from "../data-stores/RegistryServiceDataStore.sol";
+import {GlobalRegistryServiceDataStore} from "../data-stores/GlobalRegistryServiceDataStore.sol";
 
 contract GlobalRegistryService is
-    RegistryServiceDataStore,
+    GlobalRegistryServiceDataStore,
     EIP712Upgradeable,
     IGlobalRegistryService,
     BaseRBACContract

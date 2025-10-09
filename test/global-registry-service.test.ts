@@ -520,7 +520,7 @@ describe('Pre Approved Transactions', function () {
       expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
       expect(await globalRegistryService.isWallet(investor)).to.equal(true);
     });
-    it('Should throw transaction too old', async function () {
+    it('Should fail trying to add a global wallet with a transaction too old', async function () {
       const [, investor, operator] = await hre.ethers.getSigners();
       const { globalRegistryService } = await loadFixture(deployGRS);
       const grsParms = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress(), blockNumber - 1];

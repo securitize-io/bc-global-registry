@@ -52,7 +52,12 @@ const config: HardhatUserConfig = {
     fuji: {
       chainId: 43113,
       url: process.env.AVALANCHE_RPC_URL ?? '',
-      accounts: [process.env.DEPLOYER_PRIV_KEY!].filter((x) => x),
+      accounts: [
+        process.env.DEPLOYER_PRIV_KEY!,
+        process.env.OPERATOR_PRIV_KEY!,
+        process.env.INVESTOR_1_PRIV_KEY!,
+        process.env.INVESTOR_2_PRIV_KEY!
+      ].filter((x) => x),
     },
     sepolia: {
       chainId: 11155111,

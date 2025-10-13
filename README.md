@@ -55,7 +55,9 @@ npm install
 Add an `.env` file to the project and replace the values defined in `hardhat.config.ts`. Please refer to `.env-example` for guidance
 
 ```shell
-npx hardhat deploy-all --admin 0x56AE3B324e3f301f78015D9b6b74470a0e2A3a15
+npx hardhat deploy-all --admin 0x52Ae985C67D4cEE647E93eAa037bA96F7B0C0556 --operator 0x744cee96E39852C82D877eb329378Fcdf99e83F1
 ```
+__Parameters__:
 
 - **admin** param: If set, it will be the ADMIN role holder. If not set, the deployer will be the ADMIN role holder.
+- **operator** param: If set, it will be the OPERATOR role holder.

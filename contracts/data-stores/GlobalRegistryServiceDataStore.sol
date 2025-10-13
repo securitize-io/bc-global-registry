@@ -32,7 +32,7 @@ contract GlobalRegistryServiceDataStore {
 
     mapping(string investorId => Investor investor) internal investors;
     mapping(address walletAddress => Wallet wallet) internal investorsWallets;
-    mapping(string => uint256) internal noncePerInvestor;
+    mapping(string => uint256 nonce) internal noncePerInvestor;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

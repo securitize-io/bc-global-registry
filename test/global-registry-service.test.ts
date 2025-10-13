@@ -106,15 +106,15 @@ describe('CRUD investor', function () {
   it('Should fail trying to register a global investor and the zero address', async function () {
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(
-        globalRegistryService.updateInvestor(
-            INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
-            INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
-            US,
-            [ZeroAddress],
-            [1, 2, 4],
-            [1, 1, 1],
-            [0, 0, 0],
-        ),
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        [ZeroAddress],
+        [1, 2, 4],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
     ).to.be.revertedWithCustomError(globalRegistryService, 'ZeroAddressInvalid');
   });
 
@@ -365,7 +365,7 @@ describe('Wallets', function () {
   it('Trying to remove the wallet with zero address', async function () {
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(
-        globalRegistryService.removeWallet(ZeroAddress, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+      globalRegistryService.removeWallet(ZeroAddress, INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
     ).to.be.revertedWithCustomError(globalRegistryService, 'ZeroAddressInvalid');
   });
   it('Should not allow add wallet when GlobalRegistryService is paused', async () => {
@@ -558,7 +558,7 @@ describe('Pre Approved Transactions', function () {
       const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, grsParms);
       const signature = await eip712GlobalRegistryService(operator, await globalRegistryService.getAddress(), txData);
       await expect(
-          globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
+        globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
       ).to.be.revertedWithCustomError(globalRegistryService, 'ZeroAddressInvalid');
     });
     it('Should fail trying to add a global wallet with a transaction too old', async function () {

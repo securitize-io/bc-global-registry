@@ -147,7 +147,11 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      * @param _blockLimit uint256 The block number until which the transaction is valid.
      * @return True if the investor was successfully registered, false otherwise.
      */
-    function addGlobalInvestorWallet(string memory _id, address _wallet, uint256 _blockLimit) external virtual returns (bool);
+    function addGlobalInvestorWallet(
+        string memory _id,
+        address _wallet,
+        uint256 _blockLimit
+    ) external virtual returns (bool);
     /**
      * @dev Validates off-chain EIP-712 message signature and executes encoded transaction data.
      * @param signature - eip712 signature

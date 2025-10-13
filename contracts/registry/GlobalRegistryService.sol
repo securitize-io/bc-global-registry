@@ -97,10 +97,10 @@ contract GlobalRegistryService is
         string calldata _id,
         string calldata
     ) public override newInvestor(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
-        return _registerInvestor(_id, _id);
+        return _registerInvestor(_id);
     }
 
-    function _registerInvestor(string calldata _id, string calldata) internal returns (bool) {
+    function _registerInvestor(string calldata _id) internal returns (bool) {
         address sender = _msgSender();
         investors[_id] = Investor(_id, sender, 0);
 
@@ -150,7 +150,7 @@ contract GlobalRegistryService is
 
     function _updateInvestor(string calldata _id, address[] memory _wallets) internal returns (bool) {
         if (!isInvestor(_id)) {
-            _registerInvestor(_id, _id);
+            _registerInvestor(_id);
         }
 
         for (uint8 i = 0; i < _wallets.length; i++) {

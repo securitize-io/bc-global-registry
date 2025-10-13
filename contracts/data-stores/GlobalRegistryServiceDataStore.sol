@@ -18,7 +18,7 @@
 
 pragma solidity 0.8.22;
 
-contract GlobalRegistryServiceDataStore {
+abstract contract GlobalRegistryServiceDataStore {
     struct Wallet {
         string owner;
         address creator;
@@ -39,5 +39,5 @@ contract GlobalRegistryServiceDataStore {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[47] private __gap;
+    uint256[42] private __gap;
 }

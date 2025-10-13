@@ -1,4 +1,4 @@
-import "../registry/GlobalRegistryService.sol";
+import {GlobalRegistryService} from "../registry/GlobalRegistryService.sol";
 
 /**
  * Copyright 2025 Securitize Inc. All rights reserved.

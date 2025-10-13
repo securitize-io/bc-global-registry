@@ -55,6 +55,9 @@ describe('CRUD investor', function () {
       .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
+    expect(await globalRegistryService.getAttributeValue(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 1)).to.equal(0);
+    expect(await globalRegistryService.getAttributeExpiry(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 1)).to.equal(0);
+    expect(await globalRegistryService.getAttributeProofHash(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 1)).to.equal('');
     expect(await globalRegistryService['isAccreditedInvestor(address)'](investor)).to.equal(true);
     expect(await globalRegistryService['isAccreditedInvestor(string)'](INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(
       true,

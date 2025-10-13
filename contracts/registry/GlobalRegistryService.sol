@@ -165,7 +165,7 @@ contract GlobalRegistryService is
     }
 
     function getInvestorDetailsFull(
-        string memory _id
+        string memory
     )
         public
         pure
@@ -180,23 +180,7 @@ contract GlobalRegistryService is
             string memory
         )
     {
-        uint256[] memory attributeValues = new uint256[](4);
-        uint256[] memory attributeExpiries = new uint256[](4);
-        string[] memory attributeProofHashes = new string[](4);
-        for (uint8 i = 0; i < 4; i++) {
-            attributeValues[i] = getAttributeValue(_id, (uint8(2) ** i));
-            attributeExpiries[i] = getAttributeExpiry(_id, (uint8(2) ** i));
-            attributeProofHashes[i] = getAttributeProofHash(_id, (uint8(2) ** i));
-        }
-        return (
-            "",
-            attributeValues,
-            attributeExpiries,
-            attributeProofHashes[0],
-            attributeProofHashes[1],
-            attributeProofHashes[2],
-            attributeProofHashes[3]
-        );
+        return ("", new uint256[](4), new uint256[](4), "", "", "", "");
     }
 
     function setCountry(string calldata, string memory) public pure override returns (bool) {

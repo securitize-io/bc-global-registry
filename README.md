@@ -61,3 +61,20 @@ __Parameters__:
 
 - **admin** param: If set, it will be the ADMIN role holder. If not set, the deployer will be the ADMIN role holder.
 - **operator** param: If set, it will be the OPERATOR role holder.
+
+## Contract Verification 
+
+To verify the contracts on a specific network, you need to configure the environment variables with the corresponding 
+Etherscan API accounts. For example, we define the following variables in the `.env` file.
+
+For example, the Fuji Avalanche network is open and public, but there are other explorers that require an API key.
+
+```yaml
+API_KEY_AVALANCHE=Your-Api-key
+API_URL_AVALANCHE=https://api.your-provider.info/v2/network/testnet/evm/43113/etherscan
+BROWSER_URL_AVALANCHE=https://testnet.your-porvider.info/blockchain/c
+```
+
+```shell
+npx hardhat verify-grs --network fuji --proxy 0x1F35e3f472a9362782fa4707100b9280168A2F56 
+```

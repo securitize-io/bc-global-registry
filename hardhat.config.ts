@@ -7,7 +7,7 @@ import 'dotenv/config';
 import './tasks/deploy-all';
 import './tasks/deploy-grs';
 import './tasks/deploy-grs-mock-v2';
-import './tasks/verify';
+import './tasks/verify-grs';
 
 const config: HardhatUserConfig = {
   mocha: {

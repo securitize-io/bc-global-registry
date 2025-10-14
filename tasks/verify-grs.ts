@@ -1,6 +1,6 @@
 import { task, types } from 'hardhat/config';
 
-task('verify', 'Verify Global Registry Service')
+task('verify-grs', 'Verify Global Registry Service')
     .addParam('proxy', 'GlobalRegistryService proxy address', undefined, types.string, false)
     .setAction(async (args, { run, ethers }) => {
         const grsProxy = await ethers.getContractAt('GlobalRegistryService', args.proxy);

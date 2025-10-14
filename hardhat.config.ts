@@ -7,6 +7,7 @@ import 'dotenv/config';
 import './tasks/deploy-all';
 import './tasks/deploy-grs';
 import './tasks/deploy-grs-mock-v2';
+import './tasks/verify';
 
 const config: HardhatUserConfig = {
   mocha: {
@@ -26,6 +27,26 @@ const config: HardhatUserConfig = {
     outputDir: './docs',
     pages: 'items',
     exclude: ['mocks'],
+  },
+  etherscan: {
+    apiKey: {
+      mainnet: process.env.API_KEY_ETHERSCAN || "",
+      sepolia: process.env.API_KEY_ETHERSCAN || "",
+      arbitrum: process.env.API_KEY_ARBISCAN || "",
+      optimistic: process.env.API_KEY_OPTIMISTIC || "",
+      avalanche: process.env.API_KEY_AVALANCHE || "",
+      fuji: process.env.API_KEY_AVALANCHE || "",
+    },
+    customChains: [
+      {
+        network: 'fuji',
+        chainId: 43113,
+        urls: {
+          apiURL: process.env.API_URL_AVALANCHE || "",
+          browserURL: process.env.BROWSER_URL_AVALANCHE || "",
+        },
+      },
+    ],
   },
   networks: {
     fuji: {

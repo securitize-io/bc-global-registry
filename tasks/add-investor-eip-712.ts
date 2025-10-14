@@ -18,7 +18,6 @@ task('add-investor-eip-712', 'Create a new EIP-712 signed message to add a new i
     const block = await hre.ethers.provider.getBlock('latest');
     const blockNumber = block?.number || 0;
     const grsParms = [args.investorid, args.wallet, blockNumber + BLOCK_SPAN];
-    await globalRegistryService.addOperator(await operator.getAddress());
     const txData = await buildTypedData(globalRegistryService, args.investorid, grsParms);
     const signature = await eip712GlobalRegistryService(hre, operator, await globalRegistryService.getAddress(), txData);
     const tx = await globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData);

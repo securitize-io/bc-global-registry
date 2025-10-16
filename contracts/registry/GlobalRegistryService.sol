@@ -125,39 +125,39 @@ contract GlobalRegistryService is
 
     function addGlobalInvestorWallet(
         string calldata id,
-        address _wallet,
-        uint256 _blockLimit
-    ) external override whenNotPaused onlySelf newWallet(_wallet) returns (bool) {
-        if (_blockLimit < block.number) {
+        address walletAddress,
+        uint256 blockLimit
+    ) external override whenNotPaused onlySelf newWallet(walletAddress) returns (bool) {
+        if (blockLimit < block.number) {
             revert TransactionTooOld();
         }
-        address[] memory _wallets = new address[](1);
-        _wallets[0] = _wallet;
-        return _updateInvestor(id, _wallets);
+        address[] memory walletAddresses = new address[](1);
+        walletAddresses[0] = walletAddress;
+        return _updateInvestor(id, walletAddresses);
     }
 
     function updateInvestor(
         string calldata id,
         string calldata,
         string memory,
-        address[] memory _wallets,
+        address[] memory walletAddresses,
         uint8[] memory,
         uint256[] memory,
         uint256[] memory
     ) public override onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
-        return _updateInvestor(id, _wallets);
+        return _updateInvestor(id, walletAddresses);
     }
 
-    function _updateInvestor(string calldata id, address[] memory _wallets) internal returns (bool) {
+    function _updateInvestor(string calldata id, address[] memory walletAddresses) internal returns (bool) {
         if (!isInvestor(id)) {
             _registerInvestor(id);
         }
 
-        for (uint8 i = 0; i < _wallets.length; i++) {
-            if (isWallet(_wallets[i]) && !CommonUtils.isEqualString(getInvestor(_wallets[i]), id)) {
+        for (uint8 i = 0; i < walletAddresses.length; i++) {
+            if (isWallet(walletAddresses[i]) && !CommonUtils.isEqualString(getInvestor(walletAddresses[i]), id)) {
                 revert WalletBelongsToAnotherInvestor();
             } else {
-                _addWallet(_wallets[i], id);
+                _addWallet(walletAddresses[i], id);
             }
         }
 
@@ -212,56 +212,56 @@ contract GlobalRegistryService is
     }
 
     function addWallet(
-        address _address,
+        address walletAddress,
         string memory id
-    ) public override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(id) newWallet(_address) returns (bool) {
-        return _addWallet(_address, id);
+    ) public override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(id) newWallet(walletAddress) returns (bool) {
+        return _addWallet(walletAddress, id);
     }
 
-    function _addWallet(address _address, string memory id) internal addressNotZero(_address) returns (bool) {
+    function _addWallet(address walletAddress, string memory id) internal addressNotZero(walletAddress) returns (bool) {
         if (investors[id].walletCount >= type(uint8).max) {
             revert MaxWalletsReached();
         }
         address sender = _msgSender();
-        investorsWallets[_address] = Wallet(id, sender);
+        investorsWallets[walletAddress] = Wallet(id, sender);
         investors[id].walletCount++;
 
-        emit GlobalWalletAdded(_address, id, sender);
+        emit GlobalWalletAdded(walletAddress, id, sender);
 
         return true;
     }
 
-    function nonceByInvestor(string memory _investorId) public view override returns (uint256) {
-        return noncePerInvestor[_investorId];
+    function nonceByInvestor(string memory investorId) public view override returns (uint256) {
+        return noncePerInvestor[investorId];
     }
 
     function removeWallet(
-        address _address,
+        address walletAddress,
         string memory id
     )
         public
         override
         onlyRole(OPERATOR_ROLE)
         whenNotPaused
-        addressNotZero(_address)
-        walletExists(_address)
-        walletBelongsToInvestor(_address, id)
+        addressNotZero(walletAddress)
+        walletExists(walletAddress)
+        walletBelongsToInvestor(walletAddress, id)
         returns (bool)
     {
-        delete investorsWallets[_address];
+        delete investorsWallets[walletAddress];
         investors[id].walletCount--;
 
-        emit GlobalWalletRemoved(_address, id, msg.sender);
+        emit GlobalWalletRemoved(walletAddress, id, msg.sender);
 
         return true;
     }
 
-    function getInvestor(address _address) public view override returns (string memory) {
-        return investorsWallets[_address].owner;
+    function getInvestor(address walletAddress) public view override returns (string memory) {
+        return investorsWallets[walletAddress].owner;
     }
 
-    function getInvestorDetails(address _address) public view override returns (string memory, string memory) {
-        return (getInvestor(_address), getCountry(getInvestor(_address)));
+    function getInvestorDetails(address walletAddress) public view override returns (string memory, string memory) {
+        return (getInvestor(walletAddress), getCountry(getInvestor(walletAddress)));
     }
 
     function isInvestor(string memory id) public view override returns (bool) {
@@ -284,12 +284,12 @@ contract GlobalRegistryService is
         return true;
     }
 
-    function getInvestors(address _from, address _to) external view override returns (string memory, string memory) {
-        return (investorsWallets[_from].owner, investorsWallets[_to].owner);
+    function getInvestors(address from, address to) external view override returns (string memory, string memory) {
+        return (investorsWallets[from].owner, investorsWallets[to].owner);
     }
 
-    function isWallet(address _address) public view override returns (bool) {
-        return isInvestor(getInvestor(_address));
+    function isWallet(address walletAddress) public view override returns (bool) {
+        return isInvestor(getInvestor(walletAddress));
     }
 
     function executePreApprovedTransaction(

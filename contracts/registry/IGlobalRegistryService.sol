@@ -156,11 +156,13 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      * @dev Validates off-chain EIP-712 message signature and executes encoded transaction data.
      * @param signature - eip712 signature
      * @param txData - tx data
+     * @return bytes - the raw returned data. To convert to the expected return value,
+     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
      */
     function executePreApprovedTransaction(
         bytes memory signature,
         ExecutePreApprovedTransaction calldata txData
-    ) external virtual;
+    ) external virtual returns (bytes memory);
 
     /**
      * @notice Checks if an account holds the Operator role.

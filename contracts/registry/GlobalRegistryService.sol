@@ -295,7 +295,7 @@ contract GlobalRegistryService is
     function executePreApprovedTransaction(
         bytes memory signature,
         ExecutePreApprovedTransaction calldata txData
-    ) external override whenNotPaused {
+    ) external override whenNotPaused returns (bytes memory) {
         bytes32 digest = hashTx(txData);
         address signer = ECDSA.recover(digest, signature);
 
@@ -304,7 +304,7 @@ contract GlobalRegistryService is
             revert InvalidEIP712Signature();
         }
         noncePerInvestor[txData.senderInvestor] = noncePerInvestor[txData.senderInvestor] + 1;
-        Address.functionCall(txData.destination, txData.data);
+        return Address.functionCall(txData.destination, txData.data);
     }
 
     /// @dev Computes the digest to sign (EIP-712)

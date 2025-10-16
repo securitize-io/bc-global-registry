@@ -83,6 +83,54 @@ describe('CRUD investor', function () {
     ).to.be.revertedWithCustomError(globalRegistryService, 'WalletBelongsToAnotherInvestor');
   });
 
+  it('Should with too many wallets', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const wallets = [];
+    for (let i = 0; i < 300; i++) {
+      wallets.push(hre.ethers.Wallet.createRandom().address);
+    }
+    await expect(
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        wallets,
+        [1, 2, 4],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'TooManyWallets');
+  });
+
+  it('Should with too max Wallets reached', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    let wallets = [];
+    for (let i = 0; i < 254; i++) {
+      wallets.push(hre.ethers.Wallet.createRandom().address);
+    }
+    await globalRegistryService.updateInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      US,
+      wallets,
+      [1, 2, 4],
+      [1, 1, 1],
+      [0, 0, 0],
+    );
+    wallets = [hre.ethers.Wallet.createRandom().address, hre.ethers.Wallet.createRandom().address];
+    await expect(
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        wallets,
+        [1, 2, 4],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'MaxWalletsReached');
+  });
+
   it('Should fail trying to register a global investor and the zero address', async function () {
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(

@@ -2,7 +2,8 @@
 
 Global Registry Service is a smart contract for managing investors and wallets with a role-based access control. 
 Operators can register investors, add wallets, and **pre-approve transactions** using `EIP-712` signatures. Any user 
-can execute these **pre-approved transactions** on-chain by submitting the signed payload and paying the transaction fee. 
+can execute these **pre-approved transactions** on-chain by submitting the signed payload and paying the transaction fee.
+An investor can have up to 255 wallets.
 
 <p align="center">
   <img src="img/grs-solution.png" alt="Securitize GRS Solution" width="900"/>
@@ -22,6 +23,7 @@ The Global Registry Service uses a role-based access control system to manage pe
   Oversees the overall system and manages OPERATOR accounts.
     - Can register new OPERATORs and revoke existing ones.
     - Has the authority to update and upgrade smart contracts as needed.
+    - It must be a multi-signature or fireblocks wallet to enhance security.
 
 These roles ensure secure and organized management of registry operations, with clear separation of duties between daily 
 operations and administrative tasks.

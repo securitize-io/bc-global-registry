@@ -116,6 +116,10 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0xf67adce7
     error MaxWalletsReached();
 
+    /// @dev Thrown when update an investor an the array of wallets is bigger than max supported.
+    /// @custom:selector 0x86dbbe80
+    error TooManyWallets();
+
     /// @dev Thrown when a transaction's block limit has been exceeded.
     /// @custom:selector 0xa83116fc
     error TransactionTooOld();

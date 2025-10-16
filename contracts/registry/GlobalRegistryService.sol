@@ -42,6 +42,8 @@ contract GlobalRegistryService is
     bytes32 private constant TXTYPE_HASH =
         keccak256("ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce)");
 
+    uint8 private constant MAX_WALLETS_PER_INVESTOR = type(uint8).max;
+
     modifier onlySelf() {
         if (_msgSender() != address(this)) {
             revert OnlySelfError();
@@ -149,10 +151,12 @@ contract GlobalRegistryService is
     }
 
     function _updateInvestor(string calldata id, address[] memory walletAddresses) internal returns (bool) {
+        if (walletAddresses.length > MAX_WALLETS_PER_INVESTOR) {
+            revert TooManyWallets();
+        }
         if (!isInvestor(id)) {
             _registerInvestor(id);
         }
-
         for (uint8 i = 0; i < walletAddresses.length; i++) {
             if (isWallet(walletAddresses[i]) && !CommonUtils.isEqualString(getInvestor(walletAddresses[i]), id)) {
                 revert WalletBelongsToAnotherInvestor();
@@ -219,7 +223,7 @@ contract GlobalRegistryService is
     }
 
     function _addWallet(address walletAddress, string memory id) internal addressNotZero(walletAddress) returns (bool) {
-        if (investors[id].walletCount >= type(uint8).max) {
+        if (investors[id].walletCount >= MAX_WALLETS_PER_INVESTOR) {
             revert MaxWalletsReached();
         }
         address sender = _msgSender();

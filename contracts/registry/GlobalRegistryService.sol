@@ -125,6 +125,15 @@ contract GlobalRegistryService is
         return true;
     }
 
+    /**
+    * @notice Registers a new investor and a wallet via a pre-approved transaction.
+    * @dev This function can only be called by the contract itself through `executePreApprovedTransaction`.
+    * The `onlySelf` modifier prevents direct external calls.
+    * @param id The unique identifier for the investor.
+    * @param walletAddress The wallet address to associate with the investor.
+    * @param blockLimit The block number limit to ensure the transaction is recent.
+    * @return True if the investor and wallet were successfully registered, false otherwise.
+    */
     function addGlobalInvestorWallet(
         string calldata id,
         address walletAddress,

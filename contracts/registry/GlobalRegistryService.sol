@@ -180,7 +180,7 @@ contract GlobalRegistryService is
             string memory
         )
     {
-        return ("", new uint256[](4), new uint256[](4), "", "", "", "");
+        revert NotImplemented();
     }
 
     function setCountry(string calldata, string memory) public pure override returns (bool) {
@@ -188,11 +188,11 @@ contract GlobalRegistryService is
     }
 
     function getCountry(string memory) public pure override returns (string memory) {
-        return "";
+        revert NotImplemented();
     }
 
     function getCollisionHash(string calldata) public pure override returns (string memory) {
-        return "";
+        revert NotImplemented();
     }
 
     function setAttribute(string calldata, uint8, uint256, uint256, string memory) public pure override returns (bool) {
@@ -200,15 +200,15 @@ contract GlobalRegistryService is
     }
 
     function getAttributeValue(string memory, uint8) public pure override returns (uint256) {
-        return 0;
+        revert NotImplemented();
     }
 
     function getAttributeExpiry(string memory, uint8) public pure override returns (uint256) {
-        return 0;
+        revert NotImplemented();
     }
 
     function getAttributeProofHash(string memory, uint8) public pure override returns (string memory) {
-        return "";
+        revert NotImplemented();
     }
 
     function addWallet(
@@ -261,7 +261,7 @@ contract GlobalRegistryService is
     }
 
     function getInvestorDetails(address walletAddress) public view override returns (string memory, string memory) {
-        return (getInvestor(walletAddress), getCountry(getInvestor(walletAddress)));
+        return (getInvestor(walletAddress), "");
     }
 
     function isInvestor(string memory id) public view override returns (bool) {
@@ -269,19 +269,19 @@ contract GlobalRegistryService is
     }
 
     function isAccreditedInvestor(string calldata) external pure override returns (bool) {
-        return true;
+        revert NotImplemented();
     }
 
     function isAccreditedInvestor(address) external pure override returns (bool) {
-        return true;
+        revert NotImplemented();
     }
 
     function isQualifiedInvestor(address) external pure override returns (bool) {
-        return true;
+        revert NotImplemented();
     }
 
     function isQualifiedInvestor(string calldata) external pure override returns (bool) {
-        return true;
+        revert NotImplemented();
     }
 
     function getInvestors(address from, address to) external view override returns (string memory, string memory) {

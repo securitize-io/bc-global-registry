@@ -31,8 +31,8 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
         uint256 nonce;
     }
 
-    modifier addressNotZero(address _address) {
-        if (_address == address(0)) {
+    modifier addressNotZero(address addressToCheck) {
+        if (addressToCheck == address(0)) {
             revert ZeroAddressInvalid();
         }
         _;
@@ -133,24 +133,24 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
 
     /**
      * @dev Returns nonce per investor
-     * @param _investorId string (blockchainId).
+     * @param investorId string (blockchainId).
      * @return nonce
      */
-    function nonceByInvestor(string memory _investorId) public view virtual returns (uint256);
+    function nonceByInvestor(string memory investorId) public view virtual returns (uint256);
 
     /**
      * @notice Registers a new investor and a wallet in the Global Registry Service.
      * @dev Adds a new investor if it does not exists with the provided ID and metadata. Emits {GlobalInvestorAdded}.
      * It also Associates the provided wallet with the investor. Emits {GlobalWalletAdded}.
-     * @param _id string The unique identifier for the investor.
-     * @param _wallet address The wallet to associate to investor.
-     * @param _blockLimit uint256 The block number until which the transaction is valid.
+     * @param id string The unique identifier for the investor.
+     * @param wallet address The wallet to associate to investor.
+     * @param blockLimit uint256 The block number until which the transaction is valid.
      * @return True if the investor was successfully registered, false otherwise.
      */
     function addGlobalInvestorWallet(
-        string memory _id,
-        address _wallet,
-        uint256 _blockLimit
+        string memory id,
+        address wallet,
+        uint256 blockLimit
     ) external virtual returns (bool);
     /**
      * @dev Validates off-chain EIP-712 message signature and executes encoded transaction data.
@@ -167,37 +167,37 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /**
      * @notice Checks if an account holds the Operator role.
      * @dev Returns true if the given account has the Operator role.
-     * @param _account address The address to check for the Operator role.
+     * @param account address The address to check for the Operator role.
      * @return True if the account has the Operator role, false otherwise.
      */
-    function isOperator(address _account) public view virtual returns (bool);
+    function isOperator(address account) public view virtual returns (bool);
 
     /**
      * @notice Checks if an account holds the Admin role.
      * @dev Returns true if the given account has the Admin role.
-     * @param _account address The address to check for the Admin role.
+     * @param account address The address to check for the Admin role.
      * @return True if the account has the Admin role, false otherwise.
      */
-    function isAdmin(address _account) public view virtual returns (bool);
+    function isAdmin(address account) public view virtual returns (bool);
 
     /**
      * @notice Changes the admin of the Global Registry Service.
      * @dev Updates the admin address. Emits {AdminChanged}.
-     * @param _newAdmin address The address of the new admin.
+     * @param newAdmin address The address of the new admin.
      */
-    function changeAdmin(address _newAdmin) external virtual;
+    function changeAdmin(address newAdmin) external virtual;
 
     /**
      * @notice Grants the Operator role to a specified account.
      * @dev Adds a new Operator. Emits {OperatorAdded}.
-     * @param _account address The address to grant the Operator role.
+     * @param account address The address to grant the Operator role.
      */
-    function addOperator(address _account) external virtual;
+    function addOperator(address account) external virtual;
 
     /**
      * @notice Revokes the Operator role to a specified account.
      * @dev Revokes a Operator. Emits {OperatorRevoked}.
-     * @param _account address The address to revoke the Operator role.
+     * @param account address The address to revoke the Operator role.
      */
-    function revokeOperator(address _account) external virtual;
+    function revokeOperator(address account) external virtual;
 }

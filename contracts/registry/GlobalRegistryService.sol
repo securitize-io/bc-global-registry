@@ -61,70 +61,70 @@ contract GlobalRegistryService is
     }
 
     /// @inheritdoc IGlobalRegistryService
-    function isAdmin(address _account) public view virtual override returns (bool) {
-        return hasRole(DEFAULT_ADMIN_ROLE, _account);
+    function isAdmin(address account) public view virtual override returns (bool) {
+        return hasRole(DEFAULT_ADMIN_ROLE, account);
     }
 
     /// @inheritdoc IGlobalRegistryService
     function changeAdmin(
-        address _newAdmin
-    ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(_newAdmin) {
-        emit AdminChanged(_newAdmin);
-        _grantRole(DEFAULT_ADMIN_ROLE, _newAdmin);
+        address newAdmin
+    ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(newAdmin) {
+        emit AdminChanged(newAdmin);
+        _grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
         _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
     /// @inheritdoc IGlobalRegistryService
-    function isOperator(address _account) public view virtual override returns (bool) {
-        return hasRole(OPERATOR_ROLE, _account);
+    function isOperator(address account) public view virtual override returns (bool) {
+        return hasRole(OPERATOR_ROLE, account);
     }
 
     /// @inheritdoc IGlobalRegistryService
     function addOperator(
-        address _operator
-    ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(_operator) {
-        _grantRole(OPERATOR_ROLE, _operator);
-        emit OperatorAdded(_operator);
+        address operator
+    ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(operator) {
+        _grantRole(OPERATOR_ROLE, operator);
+        emit OperatorAdded(operator);
     }
 
     /// @inheritdoc IGlobalRegistryService
-    function revokeOperator(address _account) external override addressNotZero(_account) onlyRole(DEFAULT_ADMIN_ROLE) {
-        _revokeRole(OPERATOR_ROLE, _account);
-        emit OperatorRevoked(_account);
+    function revokeOperator(address account) external override addressNotZero(account) onlyRole(DEFAULT_ADMIN_ROLE) {
+        _revokeRole(OPERATOR_ROLE, account);
+        emit OperatorRevoked(account);
     }
 
     function registerInvestor(
-        string calldata _id,
+        string calldata id,
         string calldata
-    ) public override newInvestor(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
-        return _registerInvestor(_id);
+    ) public override newInvestor(id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
+        return _registerInvestor(id);
     }
 
-    function _registerInvestor(string calldata _id) internal returns (bool) {
+    function _registerInvestor(string calldata id) internal returns (bool) {
         address sender = _msgSender();
-        investors[_id] = Investor(_id, sender, 0);
+        investors[id] = Investor(id, sender, 0);
 
-        emit GlobalInvestorAdded(_id, sender);
+        emit GlobalInvestorAdded(id, sender);
 
         return true;
     }
 
     function removeInvestor(
-        string calldata _id
-    ) public override investorExists(_id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
-        if (investors[_id].walletCount > 0) {
+        string calldata id
+    ) public override investorExists(id) whenNotPaused onlyRole(OPERATOR_ROLE) returns (bool) {
+        if (investors[id].walletCount > 0) {
             revert InvestorHasWallets();
         }
 
-        delete investors[_id];
+        delete investors[id];
 
-        emit GlobalInvestorRemoved(_id, msg.sender);
+        emit GlobalInvestorRemoved(id, msg.sender);
 
         return true;
     }
 
     function addGlobalInvestorWallet(
-        string calldata _id,
+        string calldata id,
         address _wallet,
         uint256 _blockLimit
     ) external override whenNotPaused onlySelf newWallet(_wallet) returns (bool) {
@@ -133,11 +133,11 @@ contract GlobalRegistryService is
         }
         address[] memory _wallets = new address[](1);
         _wallets[0] = _wallet;
-        return _updateInvestor(_id, _wallets);
+        return _updateInvestor(id, _wallets);
     }
 
     function updateInvestor(
-        string calldata _id,
+        string calldata id,
         string calldata,
         string memory,
         address[] memory _wallets,
@@ -145,19 +145,19 @@ contract GlobalRegistryService is
         uint256[] memory,
         uint256[] memory
     ) public override onlyRole(OPERATOR_ROLE) whenNotPaused returns (bool) {
-        return _updateInvestor(_id, _wallets);
+        return _updateInvestor(id, _wallets);
     }
 
-    function _updateInvestor(string calldata _id, address[] memory _wallets) internal returns (bool) {
-        if (!isInvestor(_id)) {
-            _registerInvestor(_id);
+    function _updateInvestor(string calldata id, address[] memory _wallets) internal returns (bool) {
+        if (!isInvestor(id)) {
+            _registerInvestor(id);
         }
 
         for (uint8 i = 0; i < _wallets.length; i++) {
-            if (isWallet(_wallets[i]) && !CommonUtils.isEqualString(getInvestor(_wallets[i]), _id)) {
+            if (isWallet(_wallets[i]) && !CommonUtils.isEqualString(getInvestor(_wallets[i]), id)) {
                 revert WalletBelongsToAnotherInvestor();
             } else {
-                _addWallet(_wallets[i], _id);
+                _addWallet(_wallets[i], id);
             }
         }
 
@@ -213,20 +213,20 @@ contract GlobalRegistryService is
 
     function addWallet(
         address _address,
-        string memory _id
-    ) public override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(_id) newWallet(_address) returns (bool) {
-        return _addWallet(_address, _id);
+        string memory id
+    ) public override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(id) newWallet(_address) returns (bool) {
+        return _addWallet(_address, id);
     }
 
-    function _addWallet(address _address, string memory _id) internal addressNotZero(_address) returns (bool) {
-        if (investors[_id].walletCount >= type(uint8).max) {
+    function _addWallet(address _address, string memory id) internal addressNotZero(_address) returns (bool) {
+        if (investors[id].walletCount >= type(uint8).max) {
             revert MaxWalletsReached();
         }
         address sender = _msgSender();
-        investorsWallets[_address] = Wallet(_id, sender);
-        investors[_id].walletCount++;
+        investorsWallets[_address] = Wallet(id, sender);
+        investors[id].walletCount++;
 
-        emit GlobalWalletAdded(_address, _id, sender);
+        emit GlobalWalletAdded(_address, id, sender);
 
         return true;
     }
@@ -237,7 +237,7 @@ contract GlobalRegistryService is
 
     function removeWallet(
         address _address,
-        string memory _id
+        string memory id
     )
         public
         override
@@ -245,13 +245,13 @@ contract GlobalRegistryService is
         whenNotPaused
         addressNotZero(_address)
         walletExists(_address)
-        walletBelongsToInvestor(_address, _id)
+        walletBelongsToInvestor(_address, id)
         returns (bool)
     {
         delete investorsWallets[_address];
-        investors[_id].walletCount--;
+        investors[id].walletCount--;
 
-        emit GlobalWalletRemoved(_address, _id, msg.sender);
+        emit GlobalWalletRemoved(_address, id, msg.sender);
 
         return true;
     }
@@ -264,8 +264,8 @@ contract GlobalRegistryService is
         return (getInvestor(_address), getCountry(getInvestor(_address)));
     }
 
-    function isInvestor(string memory _id) public view override returns (bool) {
-        return !CommonUtils.isEmptyString(investors[_id].id);
+    function isInvestor(string memory id) public view override returns (bool) {
+        return !CommonUtils.isEmptyString(investors[id].id);
     }
 
     function isAccreditedInvestor(string calldata) external pure override returns (bool) {

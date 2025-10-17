@@ -83,7 +83,7 @@ describe('CRUD investor', function () {
     ).to.be.revertedWithCustomError(globalRegistryService, 'WalletBelongsToAnotherInvestor');
   });
 
-  it('Should with too many wallets', async function () {
+  it('Should revert with too many wallets', async function () {
     const { globalRegistryService } = await loadFixture(deployGRS);
     const wallets = [];
     for (let i = 0; i < 300; i++) {
@@ -102,7 +102,7 @@ describe('CRUD investor', function () {
     ).to.be.revertedWithCustomError(globalRegistryService, 'TooManyWallets');
   });
 
-  it('Should with too max Wallets reached', async function () {
+  it('Should revert with too max Wallets reached', async function () {
     const { globalRegistryService } = await loadFixture(deployGRS);
     let wallets = [];
     for (let i = 0; i < 254; i++) {

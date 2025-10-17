@@ -55,29 +55,6 @@ describe('CRUD investor', function () {
       .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
-    expect(await globalRegistryService.getAttributeValue(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 1)).to.equal(0);
-    expect(await globalRegistryService.getAttributeExpiry(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 1)).to.equal(0);
-    expect(await globalRegistryService.getAttributeProofHash(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 1)).to.equal('');
-    expect(await globalRegistryService['isAccreditedInvestor(address)'](investor)).to.equal(true);
-    expect(await globalRegistryService['isAccreditedInvestor(string)'](INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(
-      true,
-    );
-    expect(await globalRegistryService['isQualifiedInvestor(address)'](investor)).to.equal(true);
-    expect(await globalRegistryService['isQualifiedInvestor(string)'](INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(
-      true,
-    );
-    const details = await globalRegistryService.getInvestorDetailsFull(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
-    expect(details[0]).to.equal('');
-    expect(details[1][0]).to.equal(0);
-    expect(details[1][1]).to.equal(0);
-    expect(details[1][2]).to.equal(0);
-    expect(details[1][3]).to.equal(0);
-    expect(details[2][0]).to.equal(0);
-    expect(details[2][1]).to.equal(0);
-    expect(details[2][2]).to.equal(0);
-    expect(details[3]).to.equal('');
-    expect(details[4]).to.equal('');
-    expect(details[5]).to.equal('');
   });
 
   it('Should fail trying to register a global investor and the wallet belongs to another investor', async function () {
@@ -104,6 +81,54 @@ describe('CRUD investor', function () {
         [0, 0, 0],
       ),
     ).to.be.revertedWithCustomError(globalRegistryService, 'WalletBelongsToAnotherInvestor');
+  });
+
+  it('Should revert with too many wallets', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const wallets = [];
+    for (let i = 0; i < 300; i++) {
+      wallets.push(hre.ethers.Wallet.createRandom().address);
+    }
+    await expect(
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        wallets,
+        [1, 2, 4],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'TooManyWallets');
+  });
+
+  it('Should revert with too max Wallets reached', async function () {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    let wallets = [];
+    for (let i = 0; i < 254; i++) {
+      wallets.push(hre.ethers.Wallet.createRandom().address);
+    }
+    await globalRegistryService.updateInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      US,
+      wallets,
+      [1, 2, 4],
+      [1, 1, 1],
+      [0, 0, 0],
+    );
+    wallets = [hre.ethers.Wallet.createRandom().address, hre.ethers.Wallet.createRandom().address];
+    await expect(
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        wallets,
+        [1, 2, 4],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'MaxWalletsReached');
   });
 
   it('Should fail trying to register a global investor and the zero address', async function () {
@@ -142,8 +167,6 @@ describe('CRUD investor', function () {
       [1, 1, 1],
       [0, 0, 0],
     );
-    const details = await globalRegistryService.getInvestorDetailsFull(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
-    expect(details.length > 0).to.equal(true);
   });
 
   it('Should remove an investor', async function () {
@@ -296,9 +319,9 @@ describe('Wallets', function () {
       .to.emit(globalRegistryService, 'GlobalWalletAdded')
       .withArgs(investor, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
-    const investorDetails = await globalRegistryService.getInvestorDetails(investor);
-    expect(investorDetails[0]).to.equal(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
-    expect(investorDetails[1]).to.equal('');
+    const holderFromBc = await globalRegistryService.getInvestorDetails(investor);
+    expect(holderFromBc[0]).to.equal(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    expect(holderFromBc[1]).to.equal('');
   });
 
   it('Trying to add wallet an not existing investor', async function () {
@@ -481,10 +504,68 @@ describe('Not implemented features', function () {
       'NotImplemented',
     );
   });
-  it('Should return empty strings', async () => {
+  it('Should throw not implemented when trying to get country', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
-    expect(await globalRegistryService.getCountry('id')).to.equal('');
-    expect(await globalRegistryService.getCollisionHash('id')).to.equal('');
+    await expect(globalRegistryService.getCountry('id')).to.be.revertedWithCustomError(
+      globalRegistryService,
+      'NotImplemented',
+    );
+  });
+  it('Should throw not implemented when trying to get collision hash', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(globalRegistryService.getCollisionHash('id')).to.be.revertedWithCustomError(
+      globalRegistryService,
+      'NotImplemented',
+    );
+  });
+  it('Should throw not implemented when trying to get investor detail', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(globalRegistryService.getInvestorDetailsFull('id')).to.be.revertedWithCustomError(
+      globalRegistryService,
+      'NotImplemented',
+    );
+  });
+  it('Should throw not implemented when trying to get attribute value', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService.getAttributeValue(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'NotImplemented');
+  });
+  it('Should throw not implemented when trying to get attribute expiry', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService.getAttributeExpiry(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'NotImplemented');
+  });
+  it('Should throw not implemented when trying to get attribute proof hash', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService.getAttributeProofHash(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'NotImplemented');
+  });
+  it('Should throw not implemented when trying if investor if accredited with wallet', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService['isAccreditedInvestor(address)']('0x0000000000000000000000000000000000000001'),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'NotImplemented');
+  });
+  it('Should throw not implemented when trying check if investor if accredited', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService['isAccreditedInvestor(string)'](INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'NotImplemented');
+  });
+  it('Should throw not implemented when trying check if investor if qualified with wallet', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService['isQualifiedInvestor(address)']('0x0000000000000000000000000000000000000001'),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'NotImplemented');
+  });
+  it('Should throw not implemented when trying check if investor if qualified with wallet', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService['isQualifiedInvestor(string)'](INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'NotImplemented');
   });
 });
 

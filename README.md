@@ -64,6 +64,12 @@ __Parameters__:
 - **admin** param: If set, it will be the ADMIN role holder. If not set, the deployer will be the ADMIN role holder.
 - **operator** param: If set, it will be the OPERATOR role holder.
 
+## Testing the GRS with EIP-712 signatures
+
+```sh
+npx hardhat add-investor-eip-712 --grsaddress 0x741239565376723E0571D1f6493208791483c5a3 --investorid diego --wallet 0xC77825fa775E1D1F69668241676d15e59075031a --network fuji
+```
+
 ## Contract Verification 
 
 To verify the contracts on a specific network, you need to configure the environment variables with the corresponding 

@@ -1,6 +1,5 @@
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers } from 'ethers';
-import hre from 'hardhat';
 
 export const EIP712_NAME = 'GlobalRegistryService';
 export const EIP712_VERSION = '1';
@@ -10,13 +9,14 @@ export const DOMAIN_DATA = {
 };
 
 export const eip712GlobalRegistryService = async (
+  hre: any,
   hsm: HardhatEthersSigner,
-  onRampAddress: string,
+  registryServiceAddress: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   message: any,
   domainData: ethers.TypedDataDomain = DOMAIN_DATA,
 ) => {
-  domainData.verifyingContract = onRampAddress;
+  domainData.verifyingContract = registryServiceAddress;
   domainData.chainId = (await hre.ethers.provider.getNetwork()).chainId;
 
   const types = {

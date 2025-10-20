@@ -1,5 +1,6 @@
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers } from 'ethers';
+import hre from "hardhat";
 
 export const EIP712_NAME = 'GlobalRegistryService';
 export const EIP712_VERSION = '1';

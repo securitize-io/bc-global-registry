@@ -1,6 +1,6 @@
 import { task, types } from 'hardhat/config';
-import {eip712GlobalRegistryService} from "./eip-712.helper";
-import {Contract, Signature, ZeroAddress} from "ethers";
+import {eip712GlobalRegistryService} from './eip-712.helper';
+import {Contract, ZeroAddress} from 'ethers';
 
 task('add-investor-eip-712', 'Create a new EIP-712 signed message to add a new investor in GRS')
   .addParam('grsaddress', 'GlobalRegistryService proxy address', undefined, types.string, false)

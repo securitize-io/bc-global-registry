@@ -18,10 +18,10 @@ describe('Global Registry Service - Add Operator', () => {
   it('Revert when account already has operator role', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     const [, newOperator] = await hre.ethers.getSigners();
-    await globalRegistryService.addOperator(newOperator)
+    await globalRegistryService.addOperator(newOperator);
     await expect(globalRegistryService.addOperator(newOperator)).to.be.revertedWithCustomError(
-        globalRegistryService,
-        'RoleAlreadyAssigned',
+      globalRegistryService,
+      'RoleAlreadyAssigned',
     );
   });
   it('Revert when signer has not the required role assigned', async () => {
@@ -58,8 +58,8 @@ describe('Global Registry Service - Revoke Operator', () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     const [, oldOperator] = await hre.ethers.getSigners();
     await expect(globalRegistryService.revokeOperator(oldOperator)).to.be.revertedWithCustomError(
-        globalRegistryService,
-        'RoleNotAssigned',
+      globalRegistryService,
+      'RoleNotAssigned',
     );
   });
   it('Revert when signer has not the correct role assigned', async () => {
@@ -95,8 +95,8 @@ describe('Global Registry Service - Change admin', () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     const [owner] = await hre.ethers.getSigners();
     await expect(globalRegistryService.changeAdmin(owner)).to.be.revertedWithCustomError(
-        globalRegistryService,
-        'RoleAlreadyAssigned',
+      globalRegistryService,
+      'RoleAlreadyAssigned',
     );
   });
   it('Revert when admin tries to change admin to itself when revoking ADMIN role', async () => {
@@ -106,8 +106,8 @@ describe('Global Registry Service - Change admin', () => {
 
     const [, newAdmin] = await hre.ethers.getSigners();
     await expect(globalRegistryService.changeAdmin(newAdmin)).to.be.revertedWithCustomError(
-        globalRegistryService,
-        'RoleNotAssigned',
+      globalRegistryService,
+      'RoleNotAssigned',
     );
   });
   it('Revert when signer has not the required role assigned', async () => {

@@ -21,16 +21,15 @@ import {GlobalRegistryService} from "../registry/GlobalRegistryService.sol";
 pragma solidity 0.8.22;
 
 contract GlobalRegistryServiceMockV2 is GlobalRegistryService {
-
     function initRBAC() public {
         __BaseRBACContract_init();
     }
 
-    function _grantRole(bytes32, address) internal override virtual returns (bool) {
+    function _grantRole(bytes32, address) internal virtual override returns (bool) {
         return true;
     }
 
-    function _revokeRole(bytes32, address) internal override virtual returns (bool) {
+    function _revokeRole(bytes32, address) internal virtual override returns (bool) {
         return false;
     }
 }

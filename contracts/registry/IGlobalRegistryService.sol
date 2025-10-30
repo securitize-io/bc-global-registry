@@ -145,6 +145,10 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x756688fe
     error InvalidNonce();
 
+    /// @dev Thrown when trying to assign a role to an account that already has it.
+    /// @custom:selector 0x17e914bf
+    error RoleAlreadyAssigned();
+
     /// @dev Constant role identifier for the operator role.
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 

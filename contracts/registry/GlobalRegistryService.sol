@@ -87,11 +87,8 @@ contract GlobalRegistryService is
     function addOperator(
         address operator
     ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(operator) {
-        if (_grantRole(OPERATOR_ROLE, operator)) {
-            emit OperatorAdded(operator);
-        } else {
-            revert RoleAlreadyAssigned();
-        }
+        _grantRole(OPERATOR_ROLE, operator);
+        emit OperatorAdded(operator);
     }
 
     /// @inheritdoc IGlobalRegistryService

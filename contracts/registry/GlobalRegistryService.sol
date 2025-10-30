@@ -96,8 +96,11 @@ contract GlobalRegistryService is
 
     /// @inheritdoc IGlobalRegistryService
     function revokeOperator(address account) external override addressNotZero(account) onlyRole(DEFAULT_ADMIN_ROLE) {
-        _revokeRole(OPERATOR_ROLE, account);
-        emit OperatorRevoked(account);
+        if (_revokeRole(OPERATOR_ROLE, account)) {
+            emit OperatorRevoked(account);
+        } else {
+            revert RoleNotAssigned();
+        }
     }
 
     function registerInvestor(

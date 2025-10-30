@@ -54,6 +54,14 @@ describe('Global Registry Service - Revoke Operator', () => {
 
     expect(await globalRegistryService.isOperator(newOperator)).to.be.false;
   });
+  it('Revert when account has not the correct role assigned', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [, oldOperator] = await hre.ethers.getSigners();
+    await expect(globalRegistryService.revokeOperator(oldOperator)).to.be.revertedWithCustomError(
+        globalRegistryService,
+        'RoleNotAssigned',
+    );
+  });
   it('Revert when signer has not the correct role assigned', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     const [owner, unauthorizedWallet] = await hre.ethers.getSigners();

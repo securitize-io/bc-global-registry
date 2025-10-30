@@ -15,6 +15,15 @@ describe('Global Registry Service - Add Operator', () => {
 
     expect(await globalRegistryService.isOperator(newOperator)).to.be.true;
   });
+  it('Revert when account already has operator role', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [, newOperator] = await hre.ethers.getSigners();
+    await globalRegistryService.addOperator(newOperator)
+    await expect(globalRegistryService.addOperator(newOperator)).to.be.revertedWithCustomError(
+        globalRegistryService,
+        'RoleAlreadyAssigned',
+    );
+  });
   it('Revert when signer has not the required role assigned', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     const [owner, unauthorizedWallet] = await hre.ethers.getSigners();

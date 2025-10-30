@@ -42,6 +42,65 @@ describe('Global Registry Service - Add Operator', () => {
   });
 });
 
+describe('Global Registry Service - Grant Role', () => {
+  it('Add a new operator wallet', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner, newOperator] = await hre.ethers.getSigners();
+    const OPERATOR_ROLE = await globalRegistryService.OPERATOR_ROLE();
+    expect(await globalRegistryService.isOperator(newOperator)).to.be.false;
+    await expect(globalRegistryService.connect(owner).grantRole(OPERATOR_ROLE, newOperator))
+        .to.emit(globalRegistryService, 'OperatorAdded')
+        .withArgs(newOperator);
+
+    expect(await globalRegistryService.isOperator(newOperator)).to.be.true;
+  });
+  it('Add a new master wallet', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner, newAdmin] = await hre.ethers.getSigners();
+    const DEFAULT_ADMIN_ROLE = await globalRegistryService.DEFAULT_ADMIN_ROLE();
+    expect(await globalRegistryService.isAdmin(newAdmin)).to.be.false;
+    await globalRegistryService.connect(owner).grantRole(DEFAULT_ADMIN_ROLE, newAdmin)
+    expect(await globalRegistryService.isAdmin(newAdmin)).to.be.true;
+  });
+  it('Revert when role does not exist', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [, newOperator] = await hre.ethers.getSigners();
+    const REVERT_ROLE = '0x47e93da77526b7808f230bd7401f8f370783305da637681615f02f6466f00f07';
+    await expect(globalRegistryService.grantRole(REVERT_ROLE, newOperator)).to.be.revertedWithCustomError(
+        globalRegistryService,
+        'IncorrectRole',
+    );
+  });
+  it('Revert when account already has operator role', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [, newOperator] = await hre.ethers.getSigners();
+    await globalRegistryService.addOperator(newOperator);
+    const OPERATOR_ROLE = await globalRegistryService.OPERATOR_ROLE();
+    await expect(globalRegistryService.grantRole(OPERATOR_ROLE, newOperator)).to.be.revertedWithCustomError(
+        globalRegistryService,
+        'RoleAlreadyAssigned',
+    );
+  });
+  it('Revert when signer has not the required role assigned', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [, unauthorizedWallet, newOperator] = await hre.ethers.getSigners();
+    const OPERATOR_ROLE = await globalRegistryService.OPERATOR_ROLE();
+    await expect(globalRegistryService.connect(unauthorizedWallet).grantRole(OPERATOR_ROLE, newOperator)).to.be.revertedWithCustomError(
+        globalRegistryService,
+        'AccessControlUnauthorizedAccount',
+    );
+  });
+  it('Revert if account is zero address', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner] = await hre.ethers.getSigners();
+    const OPERATOR_ROLE = await globalRegistryService.OPERATOR_ROLE();
+    await expect(globalRegistryService.connect(owner).grantRole(OPERATOR_ROLE, ZeroAddress)).to.be.revertedWithCustomError(
+        globalRegistryService,
+        'ZeroAddressInvalid',
+    );
+  });
+});
+
 describe('Global Registry Service - Revoke Operator', () => {
   it('Revoke a operator wallet', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);

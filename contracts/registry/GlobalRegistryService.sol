@@ -53,6 +53,13 @@ contract GlobalRegistryService is
         _;
     }
 
+    modifier existingRole(bytes32 role) {
+        if (role != DEFAULT_ADMIN_ROLE && role != OPERATOR_ROLE) {
+            revert IncorrectRole();
+        }
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -97,6 +104,15 @@ contract GlobalRegistryService is
             emit OperatorAdded(operator);
         } else {
             revert RoleAlreadyAssigned();
+        }
+    }
+
+    function grantRole(bytes32 role, address account) public virtual override existingRole(role) onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(account) {
+        if (!_grantRole(role, account)) {
+            revert RoleAlreadyAssigned();
+        }
+        if (role == OPERATOR_ROLE) {
+            emit OperatorAdded(account);
         }
     }
 

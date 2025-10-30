@@ -113,6 +113,10 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x78a65e20
     error WalletBelongsToAnotherInvestor();
 
+    /// @dev Thrown when attempting to register a wallet that is already associated with the same investor.
+    /// @custom:selector 0xce7a1781
+    error WalletAlreadyBelongsToInvestor();
+
     /// @dev Thrown when attempting to remove an investor that still has associated wallets.
     /// @custom:selector 0xcf7758a4
     error InvestorHasWallets();
@@ -222,4 +226,12 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      * @param account address The address to revoke the Operator role.
      */
     function revokeOperator(address account) external virtual;
+
+    /**
+     * @notice Returns the number of wallets associated with a given investor.
+     * @dev Retrieves the count of wallets linked to the specified investor ID.
+     * @param investorId string The unique identifier of the investor.
+     * @return uint256 The number of wallets associated with the investor.
+     */
+    function walletCountByInvestor(string calldata investorId) external virtual returns (uint256);
 }

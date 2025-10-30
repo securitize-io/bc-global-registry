@@ -73,8 +73,14 @@ contract GlobalRegistryService is
     function changeAdmin(
         address newAdmin
     ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(newAdmin) {
-        _grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
-        _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        bool okRole = _grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
+        if (!okRole) {
+            revert RoleAlreadyAssigned();
+        }
+        okRole = _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        if (!okRole) {
+            revert RoleNotAssigned();
+        }
         emit AdminChanged(newAdmin);
     }
 

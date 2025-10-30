@@ -91,6 +91,25 @@ describe('Global Registry Service - Change admin', () => {
 
     expect(await globalRegistryService.isAdmin(newAdmin)).to.be.true;
   });
+  it('Revert when admin tries to change admin to itself', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner] = await hre.ethers.getSigners();
+    await expect(globalRegistryService.changeAdmin(owner)).to.be.revertedWithCustomError(
+        globalRegistryService,
+        'RoleAlreadyAssigned',
+    );
+  });
+  it('Revert when admin tries to change admin to itself when revoking ADMIN role', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const GlobalRegistryServiceMockV2 = await hre.ethers.getContractFactory('GlobalRegistryServiceMockV2');
+    await hre.upgrades.upgradeProxy(await globalRegistryService.getAddress(), GlobalRegistryServiceMockV2);
+
+    const [, newAdmin] = await hre.ethers.getSigners();
+    await expect(globalRegistryService.changeAdmin(newAdmin)).to.be.revertedWithCustomError(
+        globalRegistryService,
+        'RoleNotAssigned',
+    );
+  });
   it('Revert when signer has not the required role assigned', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     const [owner, unauthorizedWallet] = await hre.ethers.getSigners();

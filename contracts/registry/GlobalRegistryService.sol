@@ -151,7 +151,7 @@ contract GlobalRegistryService is
 
     function _updateInvestor(string calldata id, address[] memory walletAddresses) internal returns (bool) {
         uint256 walletAddressesLen = walletAddresses.length;
-        if (walletAddressesLen > MAX_WALLETS_PER_INVESTOR) {
+        if (walletAddressesLen >= MAX_WALLETS_PER_INVESTOR) {
             revert TooManyWallets();
         }
 

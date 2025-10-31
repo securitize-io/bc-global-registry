@@ -40,7 +40,7 @@ contract GlobalRegistryService is
     string public constant VERSION = "1";
 
     bytes32 private constant TXTYPE_HASH =
-        keccak256("ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce)");
+        keccak256("ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce,uint256 deadline)");
 
     uint8 private constant MAX_WALLETS_PER_INVESTOR = type(uint8).max;
 
@@ -318,6 +318,14 @@ contract GlobalRegistryService is
         bytes memory signature,
         ExecutePreApprovedTransaction calldata txData
     ) external override whenNotPaused returns (bytes memory) {
+        if (txData.deadline < block.timestamp) {
+            revert TransactionTooOld();
+        }
+        uint256 currentNonce = noncePerInvestor[txData.senderInvestor];
+        if (txData.nonce != currentNonce) {
+            revert InvalidEIP712Signature();
+        }
+
         bytes32 digest = hashTx(txData);
         address signer = ECDSA.recover(digest, signature);
 
@@ -325,7 +333,7 @@ contract GlobalRegistryService is
         if (!isOperator(signer)) {
             revert InvalidEIP712Signature();
         }
-        noncePerInvestor[txData.senderInvestor] = noncePerInvestor[txData.senderInvestor] + 1;
+        noncePerInvestor[txData.senderInvestor] = currentNonce + 1;
         return Address.functionCall(txData.destination, txData.data);
     }
 
@@ -337,7 +345,8 @@ contract GlobalRegistryService is
                 keccak256(bytes(txData.senderInvestor)),
                 txData.destination,
                 keccak256(txData.data),
-                noncePerInvestor[txData.senderInvestor]
+                txData.nonce,
+                txData.deadline
             )
         );
 

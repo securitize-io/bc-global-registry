@@ -29,6 +29,7 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
         address destination;
         bytes data;
         uint256 nonce;
+        uint256 deadline;
     }
 
     modifier addressNotZero(address addressToCheck) {

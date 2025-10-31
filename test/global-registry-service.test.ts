@@ -761,7 +761,7 @@ describe('Pre Approved Transactions', function () {
   });
 });
 
-describe.only('Increment nonce by investor', function () {
+describe('Increment nonce by investor', function () {
   it('Should increment nonce by investor with a new wallet', async function () {
     const { globalRegistryService } = await loadFixture(deployGRS);
     await globalRegistryService.registerInvestor(
@@ -783,12 +783,7 @@ describe.only('Increment nonce by investor', function () {
     const grsParams = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress(), blockNumber + 5];
     await globalRegistryService.addOperator(owner);
     const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, grsParams);
-    const signature = await eip712GlobalRegistryService(
-      hre,
-      owner,
-      await globalRegistryService.getAddress(),
-      txData,
-    );
+    const signature = await eip712GlobalRegistryService(hre, owner, await globalRegistryService.getAddress(), txData);
 
     await globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData);
     expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
@@ -798,5 +793,29 @@ describe.only('Increment nonce by investor', function () {
     await expect(globalRegistryService.incrementInvestorNonce(INVESTORS.INVESTOR_ID.INVESTOR_ID_1))
       .to.emit(globalRegistryService, 'InvestorNonceIncremented')
       .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, 2);
+  });
+  it('Should revert when GlobalRegistryService is paused', async function () {
+    const [, operator] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.pause();
+    await globalRegistryService.addOperator(operator);
+    await expect(
+      globalRegistryService.connect(operator).incrementInvestorNonce(INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'EnforcedPause');
+  });
+  it('Should revert when signer is not an operator', async function () {
+    const [, investor] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await expect(
+      globalRegistryService.connect(investor).incrementInvestorNonce(INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
+  });
+  it('Should revert when investor id is not registered', async function () {
+    const [, operator] = await hre.ethers.getSigners();
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    await globalRegistryService.addOperator(operator);
+    await expect(
+        globalRegistryService.connect(operator).incrementInvestorNonce(INVESTORS.INVESTOR_ID.INVESTOR_ID_1),
+    ).to.revertedWith('Unknown investor');
   });
 });

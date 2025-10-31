@@ -126,14 +126,14 @@ contract GlobalRegistryService is
     }
 
     /**
-    * @notice Registers a new investor and a wallet via a pre-approved transaction.
-    * @dev This function can only be called by the contract itself through `executePreApprovedTransaction`.
-    * The `onlySelf` modifier prevents direct external calls.
-    * @param id The unique identifier for the investor.
-    * @param walletAddress The wallet address to associate with the investor.
-    * @param blockLimit The block number limit to ensure the transaction is recent.
-    * @return True if the investor and wallet were successfully registered, false otherwise.
-    */
+     * @notice Registers a new investor and a wallet via a pre-approved transaction.
+     * @dev This function can only be called by the contract itself through `executePreApprovedTransaction`.
+     * The `onlySelf` modifier prevents direct external calls.
+     * @param id The unique identifier for the investor.
+     * @param walletAddress The wallet address to associate with the investor.
+     * @param blockLimit The block number limit to ensure the transaction is recent.
+     * @return True if the investor and wallet were successfully registered, false otherwise.
+     */
     function addGlobalInvestorWallet(
         string calldata id,
         address walletAddress,
@@ -250,7 +250,9 @@ contract GlobalRegistryService is
     }
 
     /// @inheritdoc IGlobalRegistryService
-    function incrementInvestorNonce(string memory investorId) external virtual override onlyRole(OPERATOR_ROLE) whenNotPaused {
+    function incrementInvestorNonce(
+        string memory investorId
+    ) external virtual override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(investorId) {
         noncePerInvestor[investorId]++;
         emit InvestorNonceIncremented(investorId, noncePerInvestor[investorId]);
     }
@@ -275,7 +277,6 @@ contract GlobalRegistryService is
 
         return true;
     }
-
 
     function getInvestor(address walletAddress) public view override returns (string memory) {
         return investorsWallets[walletAddress].owner;

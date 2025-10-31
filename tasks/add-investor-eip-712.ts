@@ -33,6 +33,8 @@ export const buildTypedData = async (globalRegistryService: Contract, investorId
         executor: ZeroAddress,
         data,
         nonce,
+        deadline: Math.floor(Date.now() / 1000) + TIME_SPAN_IN_SECONDS,
     };
 };
 const BLOCK_SPAN = 1000;
+const TIME_SPAN_IN_SECONDS = 600; //10 minutes

@@ -40,7 +40,9 @@ contract GlobalRegistryService is
     string public constant VERSION = "1";
 
     bytes32 private constant TXTYPE_HASH =
-        keccak256("ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce)");
+        keccak256(
+            "ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce,uint256 deadline)"
+        );
 
     uint8 private constant MAX_WALLETS_PER_INVESTOR = type(uint8).max;
 
@@ -125,23 +127,11 @@ contract GlobalRegistryService is
         return true;
     }
 
-    /**
-    * @notice Registers a new investor and a wallet via a pre-approved transaction.
-    * @dev This function can only be called by the contract itself through `executePreApprovedTransaction`.
-    * The `onlySelf` modifier prevents direct external calls.
-    * @param id The unique identifier for the investor.
-    * @param walletAddress The wallet address to associate with the investor.
-    * @param blockLimit The block number limit to ensure the transaction is recent.
-    * @return True if the investor and wallet were successfully registered, false otherwise.
-    */
+    /// @inheritdoc IGlobalRegistryService
     function addGlobalInvestorWallet(
         string calldata id,
-        address walletAddress,
-        uint256 blockLimit
+        address walletAddress
     ) external override whenNotPaused onlySelf newWallet(walletAddress) returns (bool) {
-        if (blockLimit < block.number) {
-            revert TransactionTooOld();
-        }
         address[] memory walletAddresses = new address[](1);
         walletAddresses[0] = walletAddress;
         return _updateInvestor(id, walletAddresses);
@@ -244,8 +234,17 @@ contract GlobalRegistryService is
         return true;
     }
 
+    /// @inheritdoc IGlobalRegistryService
     function nonceByInvestor(string memory investorId) public view override returns (uint256) {
         return noncePerInvestor[investorId];
+    }
+
+    /// @inheritdoc IGlobalRegistryService
+    function incrementInvestorNonce(
+        string memory investorId
+    ) external virtual override onlyRole(OPERATOR_ROLE) whenNotPaused investorExists(investorId) {
+        noncePerInvestor[investorId]++;
+        emit InvestorNonceIncremented(investorId, noncePerInvestor[investorId]);
     }
 
     function removeWallet(
@@ -309,6 +308,14 @@ contract GlobalRegistryService is
         bytes memory signature,
         ExecutePreApprovedTransaction calldata txData
     ) external override whenNotPaused returns (bytes memory) {
+        if (txData.deadline < block.timestamp) {
+            revert TransactionTooOld();
+        }
+        uint256 currentNonce = noncePerInvestor[txData.senderInvestor];
+        if (txData.nonce != currentNonce) {
+            revert InvalidNonce();
+        }
+
         bytes32 digest = hashTx(txData);
         address signer = ECDSA.recover(digest, signature);
 
@@ -316,7 +323,7 @@ contract GlobalRegistryService is
         if (!isOperator(signer)) {
             revert InvalidEIP712Signature();
         }
-        noncePerInvestor[txData.senderInvestor] = noncePerInvestor[txData.senderInvestor] + 1;
+        noncePerInvestor[txData.senderInvestor] = currentNonce + 1;
         return Address.functionCall(txData.destination, txData.data);
     }
 
@@ -328,7 +335,8 @@ contract GlobalRegistryService is
                 keccak256(bytes(txData.senderInvestor)),
                 txData.destination,
                 keccak256(txData.data),
-                noncePerInvestor[txData.senderInvestor]
+                txData.nonce,
+                txData.deadline
             )
         );
 

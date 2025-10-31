@@ -29,6 +29,7 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
         address destination;
         bytes data;
         uint256 nonce;
+        uint256 deadline;
     }
 
     modifier addressNotZero(address addressToCheck) {
@@ -92,6 +93,14 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      */
     event OperatorRevoked(address indexed operator);
 
+    /**
+     * @notice Emitted when an investor's nonce is incremented.
+     * @dev Indicates that the nonce for a specific investor has been updated.
+     * @param investorId string The unique identifier of the investor.
+     * @param newNonce uint256 The new nonce value for the investor.
+     */
+    event InvestorNonceIncremented(string investorId, uint256 newNonce);
+
     /// @dev Thrown when a function is not implemented.
     /// @custom:selector 0xd6234725
     error NotImplemented();
@@ -132,6 +141,10 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x28a2ea3b
     error OnlySelfError();
 
+    /// @dev Thrown when a provided nonce does not match the expected nonce for an investor.
+    /// @custom:selector 0x756688fe
+    error InvalidNonce();
+
     /// @dev Constant role identifier for the operator role.
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
@@ -143,19 +156,20 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     function nonceByInvestor(string memory investorId) public view virtual returns (uint256);
 
     /**
+     * @dev Increments nonce for investor. Used to invalidate pre-approved transactions.
+     * @param investorId string (blockchainId).
+     */
+    function incrementInvestorNonce(string memory investorId) external virtual;
+
+    /**
      * @notice Registers a new investor and a wallet in the Global Registry Service.
      * @dev Adds a new investor if it does not exists with the provided ID and metadata. Emits {GlobalInvestorAdded}.
      * It also Associates the provided wallet with the investor. Emits {GlobalWalletAdded}.
      * @param id string The unique identifier for the investor.
      * @param wallet address The wallet to associate to investor.
-     * @param blockLimit uint256 The block number until which the transaction is valid.
      * @return True if the investor was successfully registered, false otherwise.
      */
-    function addGlobalInvestorWallet(
-        string memory id,
-        address wallet,
-        uint256 blockLimit
-    ) external virtual returns (bool);
+    function addGlobalInvestorWallet(string memory id, address wallet) external virtual returns (bool);
     /**
      * @dev Validates off-chain EIP-712 message signature and executes encoded transaction data.
      * @param signature - eip712 signature

@@ -25,6 +25,7 @@ export const eip712GlobalRegistryService = async (
       { name: 'destination', type: 'address' },
       { name: 'data', type: 'bytes' },
       { name: 'nonce', type: 'uint256' },
+      { name: 'deadline', type: 'uint256' },
     ],
   };
 

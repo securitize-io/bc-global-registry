@@ -244,8 +244,15 @@ contract GlobalRegistryService is
         return true;
     }
 
+    /// @inheritdoc IGlobalRegistryService
     function nonceByInvestor(string memory investorId) public view override returns (uint256) {
         return noncePerInvestor[investorId];
+    }
+
+    /// @inheritdoc IGlobalRegistryService
+    function incrementInvestorNonce(string memory investorId) external virtual override onlyRole(OPERATOR_ROLE) whenNotPaused {
+        noncePerInvestor[investorId]++;
+        emit InvestorNonceIncremented(investorId, noncePerInvestor[investorId]);
     }
 
     function removeWallet(
@@ -268,6 +275,7 @@ contract GlobalRegistryService is
 
         return true;
     }
+
 
     function getInvestor(address walletAddress) public view override returns (string memory) {
         return investorsWallets[walletAddress].owner;

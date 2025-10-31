@@ -92,6 +92,14 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      */
     event OperatorRevoked(address indexed operator);
 
+    /**
+     * @notice Emitted when an investor's nonce is incremented.
+     * @dev Indicates that the nonce for a specific investor has been updated.
+     * @param investorId string The unique identifier of the investor.
+     * @param newNonce uint256 The new nonce value for the investor.
+     */
+    event InvestorNonceIncremented(string investorId, uint256 newNonce);
+
     /// @dev Thrown when a function is not implemented.
     /// @custom:selector 0xd6234725
     error NotImplemented();
@@ -141,6 +149,12 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      * @return nonce
      */
     function nonceByInvestor(string memory investorId) public view virtual returns (uint256);
+
+    /**
+     * @dev Increments nonce for investor. Used to invalidate pre-approved transactions.
+     * @param investorId string (blockchainId).
+     */
+    function incrementInvestorNonce(string memory investorId) external virtual;
 
     /**
      * @notice Registers a new investor and a wallet in the Global Registry Service.

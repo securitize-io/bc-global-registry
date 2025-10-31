@@ -167,13 +167,11 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      * It also Associates the provided wallet with the investor. Emits {GlobalWalletAdded}.
      * @param id string The unique identifier for the investor.
      * @param wallet address The wallet to associate to investor.
-     * @param blockLimit uint256 The block number until which the transaction is valid.
      * @return True if the investor was successfully registered, false otherwise.
      */
     function addGlobalInvestorWallet(
         string memory id,
-        address wallet,
-        uint256 blockLimit
+        address wallet
     ) external virtual returns (bool);
     /**
      * @dev Validates off-chain EIP-712 message signature and executes encoded transaction data.

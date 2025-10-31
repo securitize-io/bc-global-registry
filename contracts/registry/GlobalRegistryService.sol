@@ -40,7 +40,9 @@ contract GlobalRegistryService is
     string public constant VERSION = "1";
 
     bytes32 private constant TXTYPE_HASH =
-        keccak256("ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce,uint256 deadline)");
+        keccak256(
+            "ExecutePreApprovedTransaction(string senderInvestor,address destination,bytes data,uint256 nonce,uint256 deadline)"
+        );
 
     uint8 private constant MAX_WALLETS_PER_INVESTOR = type(uint8).max;
 
@@ -323,7 +325,7 @@ contract GlobalRegistryService is
         }
         uint256 currentNonce = noncePerInvestor[txData.senderInvestor];
         if (txData.nonce != currentNonce) {
-            revert InvalidEIP712Signature();
+            revert InvalidNonce();
         }
 
         bytes32 digest = hashTx(txData);

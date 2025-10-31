@@ -141,6 +141,10 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x28a2ea3b
     error OnlySelfError();
 
+    /// @dev Thrown when a provided nonce does not match the expected nonce for an investor.
+    /// @custom:selector 0x756688fe
+    error InvalidNonce();
+
     /// @dev Constant role identifier for the operator role.
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 

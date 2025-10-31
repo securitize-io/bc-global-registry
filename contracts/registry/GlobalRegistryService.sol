@@ -167,8 +167,6 @@ contract GlobalRegistryService is
                 _addWallet(newWallet, id);
             } else if (!CommonUtils.isEqualString(walletExistingInvestor, id)) {
                 revert WalletBelongsToAnotherInvestor();
-            } else {
-                revert WalletAlreadyBelongsToInvestor();
             }
         }
 

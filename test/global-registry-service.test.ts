@@ -70,18 +70,18 @@ describe('CRUD investor', function () {
     const { globalRegistryService } = await loadFixture(deployGRS);
 
     await expect(
-        globalRegistryService.updateInvestor(
-            INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
-            INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
-            US,
-            [investorWallet1, investorWallet2, investorWallet3],
-            [1, 2, 4],
-            [1, 1, 1],
-            [0, 0, 0],
-        ),
+      globalRegistryService.updateInvestor(
+        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+        US,
+        [investorWallet1, investorWallet2, investorWallet3],
+        [1, 2, 4],
+        [1, 1, 1],
+        [0, 0, 0],
+      ),
     )
-        .to.emit(globalRegistryService, 'GlobalInvestorAdded')
-        .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
+      .to.emit(globalRegistryService, 'GlobalInvestorAdded')
+      .withArgs(INVESTORS.INVESTOR_ID.INVESTOR_ID_1, owner);
     expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
     expect(await globalRegistryService.isWallet(investorWallet1)).to.equal(true);
     expect(await globalRegistryService.isWallet(investorWallet2)).to.equal(true);
@@ -90,11 +90,11 @@ describe('CRUD investor', function () {
     expect(await globalRegistryService.walletCountByInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(3);
   });
 
-  it('Should fail when trying to add the same registered wallet to an investor', async function () {
+  it('Should update investor if wallet is passed multiple times in different transactions', async function () {
     const [, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
 
-    globalRegistryService.updateInvestor(
+    await globalRegistryService.updateInvestor(
       INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
       INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
       US,
@@ -104,40 +104,39 @@ describe('CRUD investor', function () {
       [0, 0, 0],
     );
 
-    await expect(
-      globalRegistryService.updateInvestor(
-        INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
-        INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
-        US,
-        [investor],
-        [1, 2, 4],
-        [1, 1, 1],
-        [0, 0, 0],
-      ),
-    ).to.be.revertedWithCustomError(globalRegistryService, 'WalletAlreadyBelongsToInvestor');
+    await globalRegistryService.updateInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      US,
+      [investor],
+      [1, 2, 4],
+      [1, 1, 1],
+      [0, 0, 0],
+    );
 
     expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
     expect(await globalRegistryService.isWallet(investor)).to.equal(true);
     expect(await globalRegistryService.walletCountByInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(1);
   });
 
-  it('Should fail when trying to add the same registered wallet to an investor in the same call', async function () {
-    const [, investor] = await hre.ethers.getSigners();
+  it('Should update investor if wallet is passed multiple times in same transaction', async function () {
+    const [, investor, investor2] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
 
-    await expect(
-        globalRegistryService.updateInvestor(
-            INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
-            INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
-            US,
-            [investor, investor],
-            [1, 2, 4],
-            [1, 1, 1],
-            [0, 0, 0],
-        ),
-    ).to.be.revertedWithCustomError(globalRegistryService, 'WalletAlreadyBelongsToInvestor');
-  });
+    await globalRegistryService.updateInvestor(
+      INVESTORS.INVESTOR_ID.INVESTOR_ID_1,
+      INVESTORS.INVESTOR_ID.INVESTOR_COLLISION_HASH_1,
+      US,
+      [investor, investor, investor2, investor],
+      [1, 2, 4],
+      [1, 1, 1],
+      [0, 0, 0],
+    );
 
+    expect(await globalRegistryService.isInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(true);
+    expect(await globalRegistryService.isWallet(investor)).to.equal(true);
+    expect(await globalRegistryService.walletCountByInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(2);
+  });
 
   it('Should fail trying to register a global investor and the wallet belongs to another investor', async function () {
     const [, investor] = await hre.ethers.getSigners();

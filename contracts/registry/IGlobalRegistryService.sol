@@ -113,10 +113,6 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x78a65e20
     error WalletBelongsToAnotherInvestor();
 
-    /// @dev Thrown when attempting to register a wallet that is already associated with the same investor.
-    /// @custom:selector 0xce7a1781
-    error WalletAlreadyBelongsToInvestor();
-
     /// @dev Thrown when attempting to remove an investor that still has associated wallets.
     /// @custom:selector 0xcf7758a4
     error InvestorHasWallets();

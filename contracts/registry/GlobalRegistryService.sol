@@ -94,6 +94,12 @@ contract GlobalRegistryService is
         }
     }
 
+    function grantRole(bytes32 role, address account) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(account) {
+        if (_grantRole(role, account) && role == OPERATOR_ROLE) {
+            emit OperatorAdded(account);
+        }
+    }
+
     /// @inheritdoc IGlobalRegistryService
     function revokeOperator(address account) external override addressNotZero(account) onlyRole(DEFAULT_ADMIN_ROLE) {
         if (_revokeRole(OPERATOR_ROLE, account)) {

@@ -15,14 +15,11 @@ describe('Global Registry Service - Add Operator', () => {
 
     expect(await globalRegistryService.isOperator(newOperator)).to.be.true;
   });
-  it('Revert when account already has operator role', async () => {
+  it('Should not emit OperatorAdded event if role is already set', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     const [, newOperator] = await hre.ethers.getSigners();
     await globalRegistryService.addOperator(newOperator);
-    await expect(globalRegistryService.addOperator(newOperator)).to.be.revertedWithCustomError(
-      globalRegistryService,
-      'RoleAlreadyAssigned',
-    );
+    await expect(globalRegistryService.addOperator(newOperator)).not.to.emit(globalRegistryService, 'OperatorAdded');
   });
   it('Revert when signer has not the required role assigned', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
@@ -90,14 +87,6 @@ describe('Global Registry Service - Change admin', () => {
       .withArgs(newAdmin);
 
     expect(await globalRegistryService.isAdmin(newAdmin)).to.be.true;
-  });
-  it('Revert when admin tries to change admin to itself', async () => {
-    const { globalRegistryService } = await loadFixture(deployGRS);
-    const [owner] = await hre.ethers.getSigners();
-    await expect(globalRegistryService.changeAdmin(owner)).to.be.revertedWithCustomError(
-      globalRegistryService,
-      'RoleAlreadyAssigned',
-    );
   });
   it('Revert when admin tries to change admin to itself when revoking ADMIN role', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);

@@ -141,10 +141,6 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x28a2ea3b
     error OnlySelfError();
 
-    /// @dev Thrown when trying to assign a role to an account that already has it.
-    /// @custom:selector 0x17e914bf
-    error RoleAlreadyAssigned();
-
     /// @dev Thrown when trying to revoke a role to an account that has not it.
     /// @custom:selector 0x206a0819
     error RoleNotAssigned();

@@ -73,13 +73,11 @@ contract GlobalRegistryService is
     function changeAdmin(
         address newAdmin
     ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(newAdmin) {
-        if (!_grantRole(DEFAULT_ADMIN_ROLE, newAdmin)) {
-            revert RoleAlreadyAssigned();
-        }
-        if (!_revokeRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
+        if (_grantRole(DEFAULT_ADMIN_ROLE, newAdmin) && _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
+            emit AdminChanged(newAdmin);
+        } else {
             revert RoleNotAssigned();
         }
-        emit AdminChanged(newAdmin);
     }
 
     /// @inheritdoc IGlobalRegistryService
@@ -93,8 +91,6 @@ contract GlobalRegistryService is
     ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(operator) {
         if (_grantRole(OPERATOR_ROLE, operator)) {
             emit OperatorAdded(operator);
-        } else {
-            revert RoleAlreadyAssigned();
         }
     }
 

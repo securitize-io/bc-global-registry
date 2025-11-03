@@ -145,6 +145,10 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x756688fe
     error InvalidNonce();
 
+    /// @dev Thrown when trying to assign a role to an account that already has it.
+    /// @custom:selector 0x17e914bf
+    error RoleAlreadyAssigned();
+
     /// @dev Constant role identifier for the operator role.
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
@@ -218,4 +222,12 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      * @param account address The address to revoke the Operator role.
      */
     function revokeOperator(address account) external virtual;
+
+    /**
+     * @notice Returns the number of wallets associated with a given investor.
+     * @dev Retrieves the count of wallets linked to the specified investor ID.
+     * @param investorId string The unique identifier of the investor.
+     * @return uint256 The number of wallets associated with the investor.
+     */
+    function walletCountByInvestor(string calldata investorId) external virtual returns (uint256);
 }

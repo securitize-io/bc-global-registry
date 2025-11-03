@@ -150,17 +150,23 @@ contract GlobalRegistryService is
     }
 
     function _updateInvestor(string calldata id, address[] memory walletAddresses) internal returns (bool) {
-        if (walletAddresses.length > MAX_WALLETS_PER_INVESTOR) {
+        uint256 walletAddressesLen = walletAddresses.length;
+        if (walletAddressesLen >= MAX_WALLETS_PER_INVESTOR) {
             revert TooManyWallets();
         }
+
         if (!isInvestor(id)) {
             _registerInvestor(id);
         }
-        for (uint8 i = 0; i < walletAddresses.length; i++) {
-            if (isWallet(walletAddresses[i]) && !CommonUtils.isEqualString(getInvestor(walletAddresses[i]), id)) {
+
+        for (uint8 i; i < walletAddressesLen; i++) {
+            address newWallet = walletAddresses[i];
+            string memory walletExistingInvestor = getInvestor(newWallet);
+
+            if (!isInvestor(walletExistingInvestor)) {
+                _addWallet(newWallet, id);
+            } else if (!CommonUtils.isEqualString(walletExistingInvestor, id)) {
                 revert WalletBelongsToAnotherInvestor();
-            } else {
-                _addWallet(walletAddresses[i], id);
             }
         }
 
@@ -235,6 +241,10 @@ contract GlobalRegistryService is
     }
 
     /// @inheritdoc IGlobalRegistryService
+    function walletCountByInvestor(string calldata investorId) external view override returns (uint256) {
+        return investors[investorId].walletCount;
+    }
+
     function nonceByInvestor(string memory investorId) public view override returns (uint256) {
         return noncePerInvestor[investorId];
     }

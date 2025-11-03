@@ -15,10 +15,8 @@ task('add-investor-eip-712', 'Create a new EIP-712 signed message to add a new i
     if (!await globalRegistryService.isOperator(operator)) {
         throw new Error('Operator not authorized in GRS');
     }
-    const block = await hre.ethers.provider.getBlock('latest');
-    const blockNumber = block?.number || 0;
-    const grsParms = [args.investorid, args.wallet, blockNumber + BLOCK_SPAN];
-    const txData = await buildTypedData(globalRegistryService, args.investorid, grsParms);
+    const grsParams = [args.investorid, args.wallet];
+    const txData = await buildTypedData(globalRegistryService, args.investorid, grsParams);
     const signature = await eip712GlobalRegistryService(hre, operator, await globalRegistryService.getAddress(), txData);
     const tx = await globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData);
     console.log(`tx: ${tx.hash}`);
@@ -36,5 +34,4 @@ export const buildTypedData = async (globalRegistryService: Contract, investorId
         deadline: Math.floor(Date.now() / 1000) + TIME_SPAN_IN_SECONDS,
     };
 };
-const BLOCK_SPAN = 1000;
 const TIME_SPAN_IN_SECONDS = 600; //10 minutes

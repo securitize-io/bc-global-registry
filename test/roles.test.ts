@@ -106,10 +106,10 @@ describe('Global Registry Service - Revoke Operator', () => {
   });
   it('Revert when account has not the correct role assigned', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
-    const [, oldOperator] = await hre.ethers.getSigners();
-    await expect(globalRegistryService.revokeOperator(oldOperator)).to.be.revertedWithCustomError(
+    const [, newOperator] = await hre.ethers.getSigners();
+    await expect(globalRegistryService.revokeOperator(newOperator)).not.to.emit(
       globalRegistryService,
-      'RoleNotAssigned',
+      'OperatorRevoked',
     );
   });
   it('Revert when signer has not the correct role assigned', async () => {
@@ -147,10 +147,7 @@ describe('Global Registry Service - Change admin', () => {
     await hre.upgrades.upgradeProxy(await globalRegistryService.getAddress(), GlobalRegistryServiceMockV2);
 
     const [, newAdmin] = await hre.ethers.getSigners();
-    await expect(globalRegistryService.changeAdmin(newAdmin)).to.be.revertedWithCustomError(
-      globalRegistryService,
-      'RoleNotAssigned',
-    );
+    await expect(globalRegistryService.changeAdmin(newAdmin)).not.to.emit(globalRegistryService, 'AdminChanged');
   });
   it('Revert when signer has not the required role assigned', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);

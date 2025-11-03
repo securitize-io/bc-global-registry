@@ -141,14 +141,6 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @custom:selector 0x28a2ea3b
     error OnlySelfError();
 
-    /// @dev Thrown when trying to revoke a role to an account that has not it.
-    /// @custom:selector 0x206a0819
-    error RoleNotAssigned();
-
-    /// @dev Thrown when trying to perform an action with an not existing role.
-    /// @custom:selector 0x209296a3
-    error IncorrectRole();
-
     /// @dev Thrown when a provided nonce does not match the expected nonce for an investor.
     /// @custom:selector 0x756688fe
     error InvalidNonce();

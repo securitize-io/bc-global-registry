@@ -75,8 +75,6 @@ contract GlobalRegistryService is
     ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(newAdmin) {
         if (_grantRole(DEFAULT_ADMIN_ROLE, newAdmin) && _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
             emit AdminChanged(newAdmin);
-        } else {
-            revert RoleNotAssigned();
         }
     }
 
@@ -104,8 +102,6 @@ contract GlobalRegistryService is
     function revokeOperator(address account) external override addressNotZero(account) onlyRole(DEFAULT_ADMIN_ROLE) {
         if (_revokeRole(OPERATOR_ROLE, account)) {
             emit OperatorRevoked(account);
-        } else {
-            revert RoleNotAssigned();
         }
     }
 

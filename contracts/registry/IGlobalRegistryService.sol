@@ -28,7 +28,6 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
         string senderInvestor;
         address destination;
         bytes data;
-        uint256 nonce;
         uint256 deadline;
     }
 

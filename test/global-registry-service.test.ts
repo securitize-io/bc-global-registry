@@ -887,10 +887,12 @@ describe('Increment nonce by investor', function () {
       await globalRegistryService.getAddress(),
       txData,
     );
+    expect(await globalRegistryService.nonceByInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(0);
     await globalRegistryService.incrementInvestorNonce(INVESTORS.INVESTOR_ID.INVESTOR_ID_1);
+    expect(await globalRegistryService.nonceByInvestor(INVESTORS.INVESTOR_ID.INVESTOR_ID_1)).to.equal(1);
     await expect(
       globalRegistryService.connect(investor).executePreApprovedTransaction(signature, txData),
-    ).to.be.revertedWithCustomError(globalRegistryService, 'InvalidNonce');
+    ).to.be.revertedWithCustomError(globalRegistryService, 'InvalidEIP712Signature');
   });
 
   it('Should increment a positive nonce', async function () {

@@ -329,11 +329,6 @@ contract GlobalRegistryService is
         if (txData.deadline < block.timestamp) {
             revert TransactionTooOld();
         }
-        uint256 currentNonce = noncePerInvestor[txData.senderInvestor];
-        if (txData.nonce != currentNonce) {
-            revert InvalidNonce();
-        }
-
         bytes32 digest = hashTx(txData);
         address signer = ECDSA.recover(digest, signature);
 
@@ -341,7 +336,7 @@ contract GlobalRegistryService is
         if (!isOperator(signer)) {
             revert InvalidEIP712Signature();
         }
-        noncePerInvestor[txData.senderInvestor] = currentNonce + 1;
+        noncePerInvestor[txData.senderInvestor]++;
         return Address.functionCall(txData.destination, txData.data);
     }
 
@@ -353,7 +348,7 @@ contract GlobalRegistryService is
                 keccak256(bytes(txData.senderInvestor)),
                 txData.destination,
                 keccak256(txData.data),
-                txData.nonce,
+                noncePerInvestor[txData.senderInvestor],
                 txData.deadline
             )
         );

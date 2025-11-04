@@ -28,7 +28,6 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
         string senderInvestor;
         address destination;
         bytes data;
-        uint256 nonce;
         uint256 deadline;
     }
 
@@ -140,10 +139,6 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
     /// @dev Thrown when trying to execute a function that can only be called by the contract itself.
     /// @custom:selector 0x28a2ea3b
     error OnlySelfError();
-
-    /// @dev Thrown when a provided nonce does not match the expected nonce for an investor.
-    /// @custom:selector 0x756688fe
-    error InvalidNonce();
 
     /// @dev Thrown when trying to assign a role to an account that already has it.
     /// @custom:selector 0x17e914bf

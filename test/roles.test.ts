@@ -15,6 +15,12 @@ describe('Global Registry Service - Add Operator', () => {
 
     expect(await globalRegistryService.isOperator(newOperator)).to.be.true;
   });
+  it('Should not emit OperatorAdded event if role is already set', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [, newOperator] = await hre.ethers.getSigners();
+    await globalRegistryService.addOperator(newOperator);
+    await expect(globalRegistryService.addOperator(newOperator)).not.to.emit(globalRegistryService, 'OperatorAdded');
+  });
   it('Revert when signer has not the required role assigned', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     const [owner, unauthorizedWallet] = await hre.ethers.getSigners();
@@ -33,6 +39,59 @@ describe('Global Registry Service - Add Operator', () => {
   });
 });
 
+describe('Global Registry Service - Grant Role', () => {
+  let operatorRole;
+  let adminRole;
+  before(async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    operatorRole = await globalRegistryService.OPERATOR_ROLE();
+    adminRole = await globalRegistryService.DEFAULT_ADMIN_ROLE();
+  });
+  it('Add a new operator wallet', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner, newOperator] = await hre.ethers.getSigners();
+    expect(await globalRegistryService.isOperator(newOperator)).to.be.false;
+    await expect(globalRegistryService.connect(owner).grantRole(operatorRole, newOperator))
+      .to.emit(globalRegistryService, 'OperatorAdded')
+      .withArgs(newOperator);
+
+    expect(await globalRegistryService.isOperator(newOperator)).to.be.true;
+  });
+  it('Add a new admin wallet', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner, newAdmin] = await hre.ethers.getSigners();
+    expect(await globalRegistryService.isAdmin(newAdmin)).to.be.false;
+    await expect(globalRegistryService.connect(owner).grantRole(adminRole, newAdmin)).not.to.emit(
+      globalRegistryService,
+      'OperatorAdded',
+    );
+    expect(await globalRegistryService.isAdmin(newAdmin)).to.be.true;
+  });
+  it('Should not emit OperatorAdded event if role is already set', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [, newOperator] = await hre.ethers.getSigners();
+    await globalRegistryService.addOperator(newOperator);
+    await expect(globalRegistryService.grantRole(operatorRole, newOperator)).not.to.emit(
+      globalRegistryService,
+      'OperatorAdded',
+    );
+  });
+  it('Revert when signer has not the required role assigned', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner, unauthorizedWallet] = await hre.ethers.getSigners();
+    await expect(
+      globalRegistryService.connect(unauthorizedWallet).grantRole(operatorRole, owner),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'AccessControlUnauthorizedAccount');
+  });
+  it('Revert if account is zero address', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [owner] = await hre.ethers.getSigners();
+    await expect(
+      globalRegistryService.connect(owner).grantRole(operatorRole, ZeroAddress),
+    ).to.be.revertedWithCustomError(globalRegistryService, 'ZeroAddressInvalid');
+  });
+});
+
 describe('Global Registry Service - Revoke Operator', () => {
   it('Revoke a operator wallet', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
@@ -44,6 +103,14 @@ describe('Global Registry Service - Revoke Operator', () => {
       .withArgs(newOperator);
 
     expect(await globalRegistryService.isOperator(newOperator)).to.be.false;
+  });
+  it('Revert when account has not the correct role assigned', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const [, newOperator] = await hre.ethers.getSigners();
+    await expect(globalRegistryService.revokeOperator(newOperator)).not.to.emit(
+      globalRegistryService,
+      'OperatorRevoked',
+    );
   });
   it('Revert when signer has not the correct role assigned', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
@@ -73,6 +140,14 @@ describe('Global Registry Service - Change admin', () => {
       .withArgs(newAdmin);
 
     expect(await globalRegistryService.isAdmin(newAdmin)).to.be.true;
+  });
+  it('Revert when admin tries to change admin to itself when revoking ADMIN role', async () => {
+    const { globalRegistryService } = await loadFixture(deployGRS);
+    const GlobalRegistryServiceMockV2 = await hre.ethers.getContractFactory('GlobalRegistryServiceMockV2');
+    await hre.upgrades.upgradeProxy(await globalRegistryService.getAddress(), GlobalRegistryServiceMockV2);
+
+    const [, newAdmin] = await hre.ethers.getSigners();
+    await expect(globalRegistryService.changeAdmin(newAdmin)).not.to.emit(globalRegistryService, 'AdminChanged');
   });
   it('Revert when signer has not the required role assigned', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);

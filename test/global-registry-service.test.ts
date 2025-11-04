@@ -897,7 +897,6 @@ describe('Increment nonce by investor', function () {
     const [owner, investor] = await hre.ethers.getSigners();
     const { globalRegistryService } = await loadFixture(deployGRS);
     const grsParams = [INVESTORS.INVESTOR_ID.INVESTOR_ID_1, await investor.getAddress()];
-    await globalRegistryService.addOperator(owner);
     const txData = await buildTypedData(globalRegistryService, INVESTORS.INVESTOR_ID.INVESTOR_ID_1, grsParams);
     const signature = await eip712GlobalRegistryService(hre, owner, await globalRegistryService.getAddress(), txData);
 

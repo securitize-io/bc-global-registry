@@ -73,9 +73,9 @@ contract GlobalRegistryService is
     function changeAdmin(
         address newAdmin
     ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(newAdmin) {
-        _grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
-        _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        emit AdminChanged(newAdmin);
+        if (_grantRole(DEFAULT_ADMIN_ROLE, newAdmin) && _revokeRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
+            emit AdminChanged(newAdmin);
+        }
     }
 
     /// @inheritdoc IGlobalRegistryService
@@ -87,14 +87,22 @@ contract GlobalRegistryService is
     function addOperator(
         address operator
     ) external virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(operator) {
-        _grantRole(OPERATOR_ROLE, operator);
-        emit OperatorAdded(operator);
+        if (_grantRole(OPERATOR_ROLE, operator)) {
+            emit OperatorAdded(operator);
+        }
+    }
+
+    function grantRole(bytes32 role, address account) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(account) {
+        if (_grantRole(role, account) && role == OPERATOR_ROLE) {
+            emit OperatorAdded(account);
+        }
     }
 
     /// @inheritdoc IGlobalRegistryService
     function revokeOperator(address account) external override addressNotZero(account) onlyRole(DEFAULT_ADMIN_ROLE) {
-        _revokeRole(OPERATOR_ROLE, account);
-        emit OperatorRevoked(account);
+        if (_revokeRole(OPERATOR_ROLE, account)) {
+            emit OperatorRevoked(account);
+        }
     }
 
     function registerInvestor(

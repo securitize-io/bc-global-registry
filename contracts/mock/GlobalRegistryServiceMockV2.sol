@@ -24,4 +24,12 @@ contract GlobalRegistryServiceMockV2 is GlobalRegistryService {
     function initRBAC() public {
         __BaseRBACContract_init();
     }
+
+    function _grantRole(bytes32, address) internal virtual override returns (bool) {
+        return true;
+    }
+
+    function _revokeRole(bytes32, address) internal virtual override returns (bool) {
+        return false;
+    }
 }

@@ -2,7 +2,6 @@ import '@nomiclabs/hardhat-solhint';
 import { HardhatUserConfig } from 'hardhat/config';
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
-import 'solidity-docgen';
 import 'dotenv/config';
 import './tasks/deploy-all';
 import './tasks/deploy-grs';
@@ -23,14 +22,6 @@ const config: HardhatUserConfig = {
         runs: 200,
       },
     },
-  },
-  docgen: {
-    outputDir: './docs',
-    pages: 'items',
-    exclude: ['mocks'],
-  },
-  etherscan: {
-    apiKey: process.env.API_KEY_ETHERSCAN,
   },
   networks: {
     fuji: {
@@ -60,6 +51,9 @@ const config: HardhatUserConfig = {
       url: process.env.OPTIMISM_RPC_URL ?? '',
       accounts: [process.env.DEPLOYER_PRIV_KEY!].filter((x) => x),
     },
+  },
+  etherscan: {
+    apiKey: process.env.API_KEY_ETHERSCAN,
   },
 };
 

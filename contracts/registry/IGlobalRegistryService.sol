@@ -44,7 +44,7 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      *  @param investorId string The unique identifier of the investor.
      *  @param sender address The address that performed the action.
      */
-    event GlobalInvestorAdded(string indexed investorId, address indexed sender);
+    event GlobalInvestorAdded(string investorId, address indexed sender);
 
     /**
      *  @notice Emitted when an investor is removed.
@@ -52,7 +52,7 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      *  @param investorId string The unique identifier of the investor.
      *  @param sender address The address that performed the action.
      */
-    event GlobalInvestorRemoved(string indexed investorId, address indexed sender);
+    event GlobalInvestorRemoved(string investorId, address indexed sender);
 
     /**
      *  @notice Emitted when a wallet is added to an investor.
@@ -61,7 +61,7 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      *  @param investorId string The unique identifier of the investor.
      *  @param sender address The address that performed the action.
      */
-    event GlobalWalletAdded(address indexed wallet, string indexed investorId, address indexed sender);
+    event GlobalWalletAdded(address indexed wallet, string investorId, address indexed sender);
 
     /**
      *  @notice Emitted when a wallet is removed from an investor.
@@ -70,7 +70,7 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      *  @param investorId string The unique identifier of the investor.
      *  @param sender address The address that performed the action.
      */
-    event GlobalWalletRemoved(address indexed wallet, string indexed investorId, address indexed sender);
+    event GlobalWalletRemoved(address indexed wallet, string investorId, address indexed sender);
     /**
      * @notice Emitted when the admin account is changed.
      * @dev Indicates that the Global Registry Service admin has been updated.
@@ -98,7 +98,7 @@ abstract contract IGlobalRegistryService is IDSRegistryService {
      * @param investorId string The unique identifier of the investor.
      * @param newNonce uint256 The new nonce value for the investor.
      */
-    event InvestorNonceIncremented(string indexed investorId, uint256 newNonce);
+    event InvestorNonceIncremented(string investorId, uint256 newNonce);
 
     /// @dev Thrown when a function is not implemented.
     /// @custom:selector 0xd6234725

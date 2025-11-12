@@ -185,12 +185,11 @@ contract GlobalRegistryService is
     }
 
     function getInvestorDetailsFull(
-        string memory _id
+        string memory
     )
         public
-        view
+        pure
         override
-        investorExists(_id)
         returns (
             string memory,
             uint256[] memory,

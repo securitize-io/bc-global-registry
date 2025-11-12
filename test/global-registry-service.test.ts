@@ -612,10 +612,6 @@ describe('Not implemented features', function () {
     expect(investorDetails[5]).to.equal('');
     expect(investorDetails[6]).to.equal('');
   });
-  it('Should fail if investor does not exist in GRS', async () => {
-    const { globalRegistryService } = await loadFixture(deployGRS);
-    await expect(globalRegistryService.getInvestorDetailsFull('id')).to.revertedWith('Unknown investor');
-  });
   it('Should throw not implemented when trying to get attribute value', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
     await expect(

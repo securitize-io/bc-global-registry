@@ -187,36 +187,28 @@ contract GlobalRegistryService is
     function getInvestorDetailsFull(
         string memory
     )
-        public
-        pure
-        override
-        returns (
-            string memory,
-            uint256[] memory,
-            uint256[] memory,
-            string memory,
-            string memory,
-            string memory,
-            string memory
-        )
+    public
+    pure
+    override
+    returns (
+        string memory country,
+        uint256[] memory attributeValues,
+        uint256[] memory attributeExpiries,
+        string memory attributeProofHashes0,
+        string memory attributeProofHashes1,
+        string memory attributeProofHashes2,
+        string memory attributeProofHashes3
+    )
     {
-        return (
-            "", //country
-            new uint256[](0), //attributeValues
-            new uint256[](0), //attributeExpiries
-            "", //attributeProofHashes[0]
-            "", //attributeProofHashes[1]
-            "", //attributeProofHashes[2]
-            "" //attributeProofHashes[3]
-        );
+        // intentionally empty to return default values
     }
 
     function setCountry(string calldata, string memory) public pure override returns (bool) {
         revert NotImplemented();
     }
 
-    function getCountry(string memory) public pure override returns (string memory) {
-        revert NotImplemented();
+    function getCountry(string memory) public pure override returns (string memory country) {
+        // intentionally empty to return default values
     }
 
     function getCollisionHash(string calldata) public pure override returns (string memory) {

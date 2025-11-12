@@ -587,10 +587,7 @@ describe('Not implemented features', function () {
   });
   it('Should throw not implemented when trying to get country', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);
-    await expect(globalRegistryService.getCountry('id')).to.be.revertedWithCustomError(
-      globalRegistryService,
-      'NotImplemented',
-    );
+    expect(await globalRegistryService.getCountry('id')).to.equal('');
   });
   it('Should throw not implemented when trying to get collision hash', async () => {
     const { globalRegistryService } = await loadFixture(deployGRS);

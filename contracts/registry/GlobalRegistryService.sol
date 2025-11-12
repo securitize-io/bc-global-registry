@@ -92,7 +92,10 @@ contract GlobalRegistryService is
         }
     }
 
-    function grantRole(bytes32 role, address account) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(account) {
+    function grantRole(
+        bytes32 role,
+        address account
+    ) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(account) {
         if (_grantRole(role, account) && role == OPERATOR_ROLE) {
             emit OperatorAdded(account);
         }
@@ -182,11 +185,12 @@ contract GlobalRegistryService is
     }
 
     function getInvestorDetailsFull(
-        string memory
+        string memory _id
     )
         public
-        pure
+        view
         override
+        investorExists(_id)
         returns (
             string memory,
             uint256[] memory,
@@ -197,7 +201,15 @@ contract GlobalRegistryService is
             string memory
         )
     {
-        revert NotImplemented();
+        return (
+            "", //country
+            new uint256[](0), //attributeValues
+            new uint256[](0), //attributeExpiries
+            "", //attributeProofHashes[0]
+            "", //attributeProofHashes[1]
+            "", //attributeProofHashes[2]
+            "" //attributeProofHashes[3]
+        );
     }
 
     function setCountry(string calldata, string memory) public pure override returns (bool) {

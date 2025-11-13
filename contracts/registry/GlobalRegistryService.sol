@@ -92,7 +92,10 @@ contract GlobalRegistryService is
         }
     }
 
-    function grantRole(bytes32 role, address account) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(account) {
+    function grantRole(
+        bytes32 role,
+        address account
+    ) public virtual override onlyRole(DEFAULT_ADMIN_ROLE) addressNotZero(account) {
         if (_grantRole(role, account) && role == OPERATOR_ROLE) {
             emit OperatorAdded(account);
         }
@@ -184,28 +187,28 @@ contract GlobalRegistryService is
     function getInvestorDetailsFull(
         string memory
     )
-        public
-        pure
-        override
-        returns (
-            string memory,
-            uint256[] memory,
-            uint256[] memory,
-            string memory,
-            string memory,
-            string memory,
-            string memory
-        )
+    public
+    pure
+    override
+    returns (
+        string memory country,
+        uint256[] memory attributeValues,
+        uint256[] memory attributeExpiries,
+        string memory attributeProofHashes0,
+        string memory attributeProofHashes1,
+        string memory attributeProofHashes2,
+        string memory attributeProofHashes3
+    )
     {
-        revert NotImplemented();
+        // intentionally empty to return default values
     }
 
     function setCountry(string calldata, string memory) public pure override returns (bool) {
         revert NotImplemented();
     }
 
-    function getCountry(string memory) public pure override returns (string memory) {
-        revert NotImplemented();
+    function getCountry(string memory) public pure override returns (string memory country) {
+        // intentionally empty to return default values
     }
 
     function getCollisionHash(string calldata) public pure override returns (string memory) {

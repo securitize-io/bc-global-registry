@@ -86,3 +86,27 @@ BROWSER_URL_AVALANCHE=https://testnet.your-porvider.info/blockchain/c
 ```shell
 npx hardhat verify-grs --network fuji --proxy 0x1F35e3f472a9362782fa4707100b9280168A2F56 
 ```
+
+## Security Audit
+
+The Global Registry Service was audited by [Cyfrin](https://www.cyfrin.io) between October 27 and October 29, 2025.
+No critical or high-severity issues were found. All medium and low-severity findings were resolved and verified by Cyfrin.
+
+- **Report**: [Cyfrin — Global Registry Audit Report v2.0 (November 6, 2025)](audits/2025-11-06-cyfrin-securitize-global-registry-v2.0.pdf)
+- **Scope**: `GlobalRegistryServiceDataStore.sol`, `GlobalRegistryService.sol`, `BaseRBACContract.sol`
+
+| Severity      | Found | Resolved | Acknowledged |
+|---------------|------:|---------:|-------------:|
+| Critical      |     0 |        0 |            0 |
+| High          |     0 |        0 |            0 |
+| Medium        |     3 |        3 |            0 |
+| Low           |     3 |        3 |            0 |
+| Informational |     6 |        4 |            2 |
+| Gas           |     4 |        2 |            2 |
+
+> **Note on commit hashes:** this repository's history was rewritten before it was made public, so the commit hashes
+> cited in the report differ from the ones here. Audited commit `e36348808186` corresponds to
+> [`6396798d07bf`](https://github.com/securitize-io/bc-global-registry/commit/6396798d07bfeffb2c87ab87e41c678ce8450cbf),
+> and fix commit `22545b3cd240` corresponds to
+> [`356241fcea97`](https://github.com/securitize-io/bc-global-registry/commit/356241fcea97f98f28dc670d94afb5a33bd4f606).
+> The report also covers contracts from the separate `dstoken` repository, which are not part of this repository.
